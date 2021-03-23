@@ -59,6 +59,7 @@ exports[`renders ./components/typography/demo/basic.md correctly 1`] = `
     <ul>
       <li>
         <a
+          class="ant-typography"
           href="/docs/spec/proximity"
         >
           Principles
@@ -66,14 +67,16 @@ exports[`renders ./components/typography/demo/basic.md correctly 1`] = `
       </li>
       <li>
         <a
-          href="/docs/pattern/navigation"
+          class="ant-typography"
+          href="/docs/spec/overview"
         >
           Patterns
         </a>
       </li>
       <li>
         <a
-          href="/docs/resource/download"
+          class="ant-typography"
+          href="/docs/resources"
         >
           Resource Download
         </a>
@@ -160,26 +163,41 @@ exports[`renders ./components/typography/demo/basic.md correctly 1`] = `
     <ul>
       <li>
         <a
-          href="/docs/spec/proximity"
+          class="ant-typography"
+          href="/docs/spec/proximity-cn"
         >
           设计原则
         </a>
       </li>
       <li>
         <a
-          href="/docs/pattern/navigation"
+          class="ant-typography"
+          href="/docs/spec/overview-cn"
         >
           设计模式
         </a>
       </li>
       <li>
         <a
-          href="/docs/resource/download"
+          class="ant-typography"
+          href="/docs/resources-cn"
         >
           设计资源
         </a>
       </li>
     </ul>
+  </div>
+  <div
+    class="ant-typography"
+  >
+    <blockquote>
+      AntV 是蚂蚁金服全新一代数据可视化解决方案，致力于提供一套简单方便、专业可靠、不限可能的数据可视化最佳实践。得益于丰富的业务场景和用户需求挑战，AntV 经历多年积累与不断打磨，已支撑整个阿里集团内外 20000+ 业务系统，通过了日均千万级 UV 产品的严苛考验。
+我们正在基础图表，图分析，图编辑，地理空间可视化，智能可视化等各个可视化的领域耕耘，欢迎同路人一起前行。
+    </blockquote>
+    <pre>
+      AntV 是蚂蚁金服全新一代数据可视化解决方案，致力于提供一套简单方便、专业可靠、不限可能的数据可视化最佳实践。得益于丰富的业务场景和用户需求挑战，AntV 经历多年积累与不断打磨，已支撑整个阿里集团内外 20000+ 业务系统，通过了日均千万级 UV 产品的严苛考验。
+我们正在基础图表，图分析，图编辑，地理空间可视化，智能可视化等各个可视化的领域耕耘，欢迎同路人一起前行。
+    </pre>
   </div>
   <div
     class="ant-typography"
@@ -199,6 +217,19 @@ exports[`renders ./components/typography/demo/basic.md correctly 1`] = `
 
 exports[`renders ./components/typography/demo/ellipsis.md correctly 1`] = `
 Array [
+  <button
+    aria-checked="true"
+    class="ant-switch ant-switch-checked"
+    role="switch"
+    type="button"
+  >
+    <div
+      class="ant-switch-handle"
+    />
+    <span
+      class="ant-switch-inner"
+    />
+  </button>,
   <div
     class="ant-typography ant-typography-ellipsis"
   >
@@ -209,6 +240,12 @@ Array [
   >
     Ant Design, a design language for background applications, is refined by Ant UED Team. Ant Design, a design language for background applications, is refined by Ant UED Team. Ant Design, a design language for background applications, is refined by Ant UED Team. Ant Design, a design language for background applications, is refined by Ant UED Team. Ant Design, a design language for background applications, is refined by Ant UED Team. Ant Design, a design language for background applications, is refined by Ant UED Team.
   </div>,
+  <span
+    class="ant-typography ant-typography-ellipsis"
+    style="width:100px"
+  >
+    Ant Design, a design language for background applications, is refined by Ant UED Team.
+  </span>,
 ]
 `;
 
@@ -344,7 +381,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="edit"
           fill="currentColor"
           focusable="false"
@@ -377,7 +413,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="highlight"
           fill="currentColor"
           focusable="false"
@@ -410,7 +445,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="edit"
           fill="currentColor"
           focusable="false"
@@ -443,7 +477,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="edit"
           fill="currentColor"
           focusable="false"
@@ -476,7 +509,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="copy"
           fill="currentColor"
           focusable="false"
@@ -509,7 +541,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="copy"
           fill="currentColor"
           focusable="false"
@@ -542,7 +573,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="smile"
           fill="currentColor"
           focusable="false"
@@ -575,7 +605,6 @@ Array [
       >
         <svg
           aria-hidden="true"
-          class=""
           data-icon="copy"
           fill="currentColor"
           focusable="false"

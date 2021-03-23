@@ -22,17 +22,23 @@ cover: https://gw.alipayobjects.com/zos/antfincdn/D1dXz9PZqa/image.svg
 | fallback | 加载失败容错地址 | string | - | 4.6.0 |
 | height | 图像高度 | string \| number | - | 4.6.0 |
 | placeholder | 加载占位, 为 `true` 时使用默认占位 | ReactNode | - | 4.6.0 |
-| preview | 预览参数，为 `false` 时禁用 | boolean \| \| [previewType](#previewType) | true | 4.6.0 [previewType](#previewType):4.7.0 |
+| preview | 预览参数，为 `false` 时禁用 | boolean \| [previewType](#previewType) | true | 4.6.0 [previewType](#previewType):4.7.0 |
 | src | 图片地址 | string | - | 4.6.0 |
 | width | 图像宽度 | string \| number | - | 4.6.0 |
+| onError | 加载错误回调 | (event: Event) => void | - | 4.12.0 |
 
 ### previewType
 
-```
+```js
 {
-  visible: boolean,
-  onVisibleChange:function(value, prevValue)
+  visible?: boolean;
+  onVisibleChange?: (visible, prevVisible) => void;
+  getContainer?: string | HTMLElement | (() => HTMLElement); // V4.8.0
+  src?: string; // V4.10.0
+  mask?: ReactNode; // V4.9.0
+  maskClassName?: string; // V4.11.0
+  current?: number; // V4.12.0 仅支持 PreviewGroup。
 }
 ```
 
-其他属性见 [<img\>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes)
+其他属性见 [&lt;img>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes)

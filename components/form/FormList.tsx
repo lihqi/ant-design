@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { List } from 'rc-field-form';
-import { StoreValue } from 'rc-field-form/lib/interface';
+import { ValidatorRule, StoreValue } from 'rc-field-form/lib/interface';
 import devWarning from '../_util/devWarning';
 import { ConfigContext } from '../config-provider';
 import { FormItemPrefixContext } from './context';
@@ -20,6 +20,8 @@ export interface FormListOperation {
 export interface FormListProps {
   prefixCls?: string;
   name: string | number | (string | number)[];
+  rules?: ValidatorRule[];
+  initialValue?: any[];
   children: (
     fields: FormListFieldData[],
     operation: FormListOperation,
@@ -39,19 +41,17 @@ const FormList: React.FC<FormListProps> = ({
 
   return (
     <List {...props}>
-      {(fields, operation, meta) => {
-        return (
-          <FormItemPrefixContext.Provider value={{ prefixCls, status: 'error' }}>
-            {children(
-              fields.map(field => ({ ...field, fieldKey: field.key })),
-              operation,
-              {
-                errors: meta.errors,
-              },
-            )}
-          </FormItemPrefixContext.Provider>
-        );
-      }}
+      {(fields, operation, meta) => (
+        <FormItemPrefixContext.Provider value={{ prefixCls, status: 'error' }}>
+          {children(
+            fields.map(field => ({ ...field, fieldKey: field.key })),
+            operation,
+            {
+              errors: meta.errors,
+            },
+          )}
+        </FormItemPrefixContext.Provider>
+      )}
     </List>
   );
 };
