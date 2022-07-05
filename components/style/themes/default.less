@@ -1,5 +1,5 @@
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
-@import '../color/colors';
+@import '../color/dataColor';
 
 @theme: default;
 
@@ -14,12 +14,12 @@
 
 // -------- Colors -----------
 // >>> Primary
-@primary-color: @blue-6;
+@primary-color: @datablue-6;
 @primary-color-hover: color(~`colorPalette('@{primary-color}', 5) `);
 @primary-color-active: color(~`colorPalette('@{primary-color}', 7) `);
 @primary-color-outline: fade(@primary-color, @outline-fade);
 
-@processing-color: @blue-6;
+@processing-color: @datablue-6;
 
 // >>> Info
 @info-color: @primary-color;
