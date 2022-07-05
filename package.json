@@ -133,7 +133,7 @@
     "rc-notification": "~4.5.2",
     "rc-pagination": "~3.1.6",
     "rc-picker": "~2.5.10",
-    "rc-progress": "~3.1.0",
+    "rc-progress": "~3.4.0",
     "rc-rate": "~2.9.0",
     "rc-resize-observer": "^1.0.0",
     "rc-select": "~12.1.6",
