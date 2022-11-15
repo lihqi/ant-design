@@ -31,7 +31,7 @@ Uploading is the process of publishing information (web pages, text, pictures, v
 | headers | Set request headers, valid above IE10 | object | - |  |
 | iconRender | Custom show icon | (file: UploadFile, listType?: UploadListType) => ReactNode | - |  |
 | isImageUrl | Customize if render &lt;img /> in thumbnail | (file: UploadFile) => boolean | [(inside implementation)](https://github.com/ant-design/ant-design/blob/4ad5830eecfb87471cd8ac588c5d992862b70770/components/upload/utils.tsx#L47-L68) |  |
-| itemRender | Custom item of uploadList | (originNode: ReactElement, file: UploadFile, fileList?: object\[]) => React.ReactNode | - | 4.7.0 |
+| itemRender | Custom item of uploadList | (originNode: ReactElement, file: UploadFile, fileList: object\[], actions: { download: function, preview: function, remove: function }) => React.ReactNode | - | 4.16.0 |
 | listType | Built-in stylesheets, support for three types: `text`, `picture` or `picture-card` | string | `text` |  |
 | maxCount | Limit the number of uploaded files. Will replace current one when `maxCount` is `1` | number | - | 4.10.0 |
 | method | The http method of upload request | string | `post` |  |
@@ -40,9 +40,10 @@ Uploading is the process of publishing information (web pages, text, pictures, v
 | openFileDialogOnClick | Click open file dialog | boolean | true |  |
 | previewFile | Customize preview file logic | (file: File \| Blob) => Promise&lt;dataURL: string> | - |  |
 | progress | Custom progress bar | [ProgressProps](/components/progress/#API) (support `type="line"` only) | { strokeWidth: 2, showInfo: false } | 4.3.0 |
-| showUploadList | Whether to show default upload list, could be an object to specify `showPreviewIcon`, `showRemoveIcon`, `showDownloadIcon`, `removeIcon` and `downloadIcon` individually | boolean \| { showPreviewIcon?: boolean, showDownloadIcon?: boolean, showRemoveIcon?: boolean, removeIcon?: ReactNode \| (file: UploadFile) => ReactNode, downloadIcon?: ReactNode \| (file: UploadFile) => ReactNode } | true | function: 4.7.0 |
+| showUploadList | Whether to show default upload list, could be an object to specify `showPreviewIcon`, `showRemoveIcon`, `showDownloadIcon`, `removeIcon` and `downloadIcon` individually | boolean \| { showPreviewIcon?: boolean, showDownloadIcon?: boolean, showRemoveIcon?: boolean, previewIcon?: ReactNode \| (file: UploadFile) => ReactNode, removeIcon?: ReactNode \| (file: UploadFile) => ReactNode, downloadIcon?: ReactNode \| (file: UploadFile) => ReactNode } | true | function: 4.7.0 |
 | withCredentials | The ajax upload with cookie sent | boolean | false |  |
 | onChange | A callback function, can be executed when uploading state is changing, see [onChange](#onChange) | function | - |  |
+| onDrop | A callback function executed when files are dragged and dropped into upload area | (event: React.DragEvent) => void | - | 4.16.0 |
 | onDownload | Click the method to download the file, pass the method to perform the method logic, do not pass the default jump to the new TAB | function(file): void | (Jump to new TAB) |  |
 | onPreview | A callback function, will be executed when file link or preview icon is clicked | function(file) | - |  |
 | onRemove | A callback function, will be executed when removing file button is clicked, remove event will be prevented when return value is false or a Promise which resolve(false) or reject | function(file): boolean \| Promise | - |  |
@@ -51,14 +52,15 @@ Uploading is the process of publishing information (web pages, text, pictures, v
 
 Extends File with additional props.
 
-| Property | Description | Type | Default |
-| --- | --- | --- | --- |
-| name | File name | string | - |
-| percent | Upload progress percent | number | - |
-| status | Upload status. Show different style when configured | `error` \| `success` \| `done` \| `uploading` \| `removed` | - |
-| thumbUrl | Thumb image url | string | - |
-| uid | unique id. Will auto generate when not provided | string | - |
-| url | Download url | string | - |
+| Property | Description | Type | Default | Version |
+| --- | --- | --- | --- | --- |
+| crossOrigin | CORS settings attributes | `'anonymous'` \| `'use-credentials'` \| `''` | - | 4.20.0 |
+| name | File name | string | - | - |
+| percent | Upload progress percent | number | - | - |
+| status | Upload status. Show different style when configured | `error` \| `success` \| `done` \| `uploading` \| `removed` | - | - |
+| thumbUrl | Thumb image url | string | - | - |
+| uid | unique id. Will auto generate when not provided | string | - | - |
+| url | Download url | string | - | - |
 
 ### onChange
 
@@ -93,7 +95,7 @@ When uploading state change, it returns:
 
 ## FAQ
 
-### How to implement upload server side?
+### How do I implement upload server side?
 
 - You can consult [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload/wiki#server-side) about how to implement server side upload interface.
 - There is a mock example of [express](https://github.com/react-component/upload/blob/master/server.js) in rc-upload.
@@ -106,10 +108,18 @@ Please set property `url` of each item in `fileList` to control content of link.
 
 See <https://github.com/react-component/upload#customrequest>.
 
-### Why `fileList` in control will not trigger `onChange` `status` update when file not in the list?
+### Why will the `fileList` that's in control not trigger `onChange` `status` update when the file is not in the list?
 
-`onChange` only trigger when file in the list, it will ignore left events when removed from the list. Please note that there exist bug which makes event still trigger even the file is not in the list before `4.13.0`.
+`onChange` will only trigger when the file is in the list, it will ignore any events removed from the list. Please note that there does exist a bug which makes an event still trigger even when the file is not in the list before `4.13.0`.
 
-### Why sometime `onChange` return File object and sometime return { originFileObj: File }?
+### Why does `onChange` sometimes return File object and other times return { originFileObj: File }?
 
 For compatible case, we return File object when `beforeUpload` return `false`. It will merge to `{ originFileObj: File }` in next major version. Current version is compatible to get origin file by `info.file.originFileObj`. You can change this before major release.
+
+### Why sometime Chrome can not upload?
+
+Chrome update will also break native upload. Please restart chrome to finish the upload work. Ref:
+
+- [#32672](https://github.com/ant-design/ant-design/issues/32672)
+- [#32913](https://github.com/ant-design/ant-design/issues/32913)
+- [#33988](https://github.com/ant-design/ant-design/issues/33988)

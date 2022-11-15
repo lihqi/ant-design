@@ -1,6 +1,71 @@
 /* eslint-disable import/prefer-default-export */
 import * as React from 'react';
 
+export interface Author {
+  avatar: string;
+  href: string;
+  type: 'design' | 'develop';
+  name: string;
+}
+
+export interface Article {
+  title: string;
+  href: string;
+  date: string;
+  type: 'design' | 'develop';
+  author: Author['name'];
+}
+
+export interface Recommendation {
+  title?: string;
+  img?: string;
+  href?: string;
+  popularize?: boolean;
+  description?: string;
+}
+
+type SourceType = 'zhihu' | 'yuque';
+export interface Extra {
+  title: string;
+  description: string;
+  date: string;
+  img: string;
+  source: SourceType;
+  href: string;
+}
+
+export interface Icon {
+  name: string;
+  href: string;
+}
+
+export type Articles = {
+  cn: Article[];
+  en: Article[];
+};
+
+export type Authors = Author[];
+
+export type Recommendations = {
+  cn: Recommendation[];
+  en: Recommendation[];
+};
+
+export type Extras = {
+  cn: Extra[];
+  en: Extra[];
+};
+
+export type Icons = Icon[];
+
+export type SiteData = {
+  articles: Articles;
+  authors: Authors;
+  recommendations: Recommendations;
+  extras: Extras;
+  icons: Icons;
+};
+
 export function preLoad(list: string[]) {
   if (typeof window !== 'undefined') {
     // 图处预加载；
@@ -15,26 +80,21 @@ export function preLoad(list: string[]) {
   }
 }
 
-const siteData: Record<string, any> = {};
-export function useSiteData<T>(endpoint: string, language?: 'cn' | 'en'): T {
-  const getData = () => {
-    const endpointData = siteData[endpoint];
-    if (!endpointData) return null;
-    return language ? endpointData[language] : endpointData;
-  };
-
-  const [data, setData] = React.useState<any>(getData());
+export function useSiteData(): [Partial<SiteData>, boolean] {
+  const [data, setData] = React.useState<Partial<SiteData>>({});
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    if (!data && typeof fetch !== 'undefined') {
-      fetch(`https://my-json-server.typicode.com/ant-design/website-data/${endpoint}`)
+    if (Object.keys(data ?? {}).length === 0 && typeof fetch !== 'undefined') {
+      setLoading(true);
+      fetch(`https://render.alipay.com/p/h5data/antd4-config_website-h5data.json`)
         .then(res => res.json())
-        .then((res: any) => {
-          siteData[endpoint] = res;
-          setData(getData());
+        .then(result => {
+          setData(result);
+          setLoading(false);
         });
     }
-  }, [endpoint]);
+  }, []);
 
-  return data;
+  return [data, loading];
 }

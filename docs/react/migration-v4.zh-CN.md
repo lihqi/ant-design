@@ -141,7 +141,9 @@ const Demo = () => (
 - Table 重写
   - 在没有 `columns` 时仍然会保留一列。
   - 嵌套 `dataIndex` 支持从 `'xxx.yyy'` 改成 `['xxx', 'yyy']`。
-- Pagination 自 `4.1.0` 起大于 50 条数据默认会展示 `pageSize` 切换器，这条规则同样会运用于 Table 上。
+- Pagination 重写
+  - 自 `4.1.0` 起大于 50 条数据默认会展示 `pageSize` 切换器，这条规则同样会运用于 Table 上。
+  - `onChange` 方法在 `pageSize` 值改变时也会触发。
 - Tabs 重写（[4.3.0](https://github.com/ant-design/ant-design/pull/24552)）
   - Dom 结构变化，如有覆盖样式需要仔细检查。
   - 横向滚动交互变化，`onPrevClick` 和 `onNextClick` 不再工作。
@@ -190,6 +192,14 @@ antd4-codemod src
 ### 迁移工具修改详情
 
 `@ant-design/codemod-v4` 会帮你迁移到 antd v4, 废弃的组件则通过 `@ant-design/compatible` 保持运行, 一般来说你无需手动迁移。下方内容详细介绍了整体的迁移和变化，你也可以参照变动手动修改。
+
+#### 安装兼容包
+
+安装 `@ant-design/compatible` 通过指定 `v4-compatible-v3` tag 确认为 v4 兼容 v3 版本：
+
+```bash
+npm install --save @ant-design/compatible@v4-compatible-v3
+```
 
 #### 将已废弃的 `Form` 和 `Mention` 组件通过 `@ant-design/compatible` 包引入
 

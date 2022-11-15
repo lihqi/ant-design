@@ -7,7 +7,7 @@ title:
 
 ## zh-CN
 
-通过 `stringMode` 开启高精度小数支持，`onChange` 事件将返回 string 类型。对于旧版游览器，你需要 BigInt polyfill。
+通过 `stringMode` 开启高精度小数支持，`onChange` 事件将返回 string 类型。对于旧版浏览器，你需要 BigInt polyfill。
 
 ## en-US
 
@@ -15,12 +15,13 @@ Use `stringMode` to support high precision decimals support. `onChange` will ret
 
 ```tsx
 import { InputNumber } from 'antd';
+import React from 'react';
 
-function onChange(value: string) {
+const onChange = (value: string) => {
   console.log('changed', value);
-}
+};
 
-ReactDOM.render(
+const App: React.FC = () => (
   <InputNumber<string>
     style={{ width: 200 }}
     defaultValue="1"
@@ -29,7 +30,8 @@ ReactDOM.render(
     step="0.00000000000001"
     onChange={onChange}
     stringMode
-  />,
-  mountNode,
+  />
 );
+
+export default App;
 ```

@@ -1,7 +1,10 @@
 import * as React from 'react';
-import Statistic, { StatisticProps } from './Statistic';
-import { formatCountdown, countdownValueType, FormatConfig } from './utils';
+import useForceUpdate from '../_util/hooks/useForceUpdate';
 import { cloneElement } from '../_util/reactNode';
+import type { StatisticProps } from './Statistic';
+import Statistic from './Statistic';
+import type { countdownValueType, FormatConfig, valueType } from './utils';
+import { formatCountdown } from './utils';
 
 const REFRESH_INTERVAL = 1000 / 30;
 
@@ -9,79 +12,58 @@ interface CountdownProps extends StatisticProps {
   value?: countdownValueType;
   format?: string;
   onFinish?: () => void;
+  onChange?: (value?: countdownValueType) => void;
 }
 
 function getTime(value?: countdownValueType) {
-  return new Date(value as any).getTime();
+  return new Date(value as valueType).getTime();
 }
 
-class Countdown extends React.Component<CountdownProps, {}> {
-  static defaultProps: Partial<CountdownProps> = {
-    format: 'HH:mm:ss',
+const Countdown: React.FC<CountdownProps> = props => {
+  const { value, format = 'HH:mm:ss', onChange, onFinish } = props;
+
+  const forceUpdate = useForceUpdate();
+
+  const countdown = React.useRef<NodeJS.Timer | null>(null);
+
+  const stopTimer = () => {
+    onFinish?.();
+    if (countdown.current) {
+      clearInterval(countdown.current);
+      countdown.current = null;
+    }
   };
 
-  countdownId?: number;
-
-  componentDidMount() {
-    this.syncTimer();
-  }
-
-  componentDidUpdate() {
-    this.syncTimer();
-  }
-
-  componentWillUnmount() {
-    this.stopTimer();
-  }
-
-  syncTimer = () => {
-    const { value } = this.props;
-
+  const syncTimer = () => {
     const timestamp = getTime(value);
     if (timestamp >= Date.now()) {
-      this.startTimer();
-    } else {
-      this.stopTimer();
+      countdown.current = setInterval(() => {
+        forceUpdate();
+        onChange?.(timestamp - Date.now());
+        if (timestamp < Date.now()) {
+          stopTimer();
+        }
+      }, REFRESH_INTERVAL);
     }
   };
 
-  startTimer = () => {
-    if (this.countdownId) return;
-
-    this.countdownId = window.setInterval(() => {
-      this.forceUpdate();
-    }, REFRESH_INTERVAL);
-  };
-
-  stopTimer = () => {
-    const { onFinish, value } = this.props;
-    if (this.countdownId) {
-      clearInterval(this.countdownId);
-      this.countdownId = undefined;
-
-      const timestamp = getTime(value);
-      if (onFinish && timestamp < Date.now()) {
-        onFinish();
+  React.useEffect(() => {
+    syncTimer();
+    return () => {
+      if (countdown.current) {
+        clearInterval(countdown.current);
+        countdown.current = null;
       }
-    }
-  };
+    };
+  }, [value]);
 
-  formatCountdown = (value: countdownValueType, config: FormatConfig) => {
-    const { format } = this.props;
-    return formatCountdown(value, { ...config, format });
-  };
+  const formatter = (formatValue: countdownValueType, config: FormatConfig) =>
+    formatCountdown(formatValue, { ...config, format });
 
-  // Countdown do not need display the timestamp
-  valueRender = (node: React.ReactElement<HTMLDivElement>) =>
-    cloneElement(node, {
-      title: undefined,
-    });
+  const valueRender = (node: React.ReactElement<HTMLDivElement>) =>
+    cloneElement(node, { title: undefined });
 
-  render() {
-    return (
-      <Statistic valueRender={this.valueRender} {...this.props} formatter={this.formatCountdown} />
-    );
-  }
-}
+  return <Statistic {...props} valueRender={valueRender} formatter={formatter} />;
+};
 
-export default Countdown;
+export default React.memo(Countdown);

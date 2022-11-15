@@ -3,12 +3,11 @@ const chalk = require('chalk');
 const { spawn } = require('child_process');
 const jsdom = require('jsdom');
 const jQuery = require('jquery');
-const fetch = require('node-fetch');
+const fetch = require('isomorphic-fetch');
 const open = require('open');
 const fs = require('fs-extra');
 const path = require('path');
-const simpleGit = require('simple-git/promise');
-const inquirer = require('inquirer');
+const simpleGit = require('simple-git');
 
 const { JSDOM } = jsdom;
 const { window } = new JSDOM();
@@ -19,7 +18,7 @@ const $ = jQuery(window);
 
 const QUERY_TITLE = '.gh-header-title .js-issue-title';
 const QUERY_DESCRIPTION_LINES = '.comment-body table tbody tr';
-const QUERY_AUTHOR = '.timeline-comment-header-text .author:first';
+const QUERY_AUTHOR = '.pull-discussion-timeline .TimelineItem:first .author:first';
 // https://github.com/orgs/ant-design/teams/ant-design-collaborators/members
 const MAINTAINERS = [
   'zombiej',
@@ -35,7 +34,10 @@ const MAINTAINERS = [
   'Rustin-Liu',
   'fireairforce',
   'kerm1it',
-].map(author => author.toLowerCase());
+  'madccc',
+  'MadCcc',
+  'li-jia-nan',
+].map((author) => author.toLowerCase());
 
 const cwd = process.cwd();
 const git = simpleGit(cwd);
@@ -46,18 +48,24 @@ function getDescription(entity) {
   }
   const descEle = entity.element.find('td:last');
   let htmlContent = descEle.html();
-  htmlContent = htmlContent.replace(/<code>([^<]*)<\/code>/g, '`$1`');
+  htmlContent = htmlContent.replace(/<code class="notranslate">([^<]*)<\/code>/g, '`$1`');
   return htmlContent.trim();
 }
 
 async function printLog() {
   const tags = await git.tags();
+  const { default: inquirer } = await import('inquirer');
   const { fromVersion } = await inquirer.prompt([
     {
       type: 'list',
       name: 'fromVersion',
       message: '🏷  Please choose tag to compare with current branch:',
-      choices: tags.all.reverse().slice(0, 10),
+      choices: tags.all
+        .filter((item) => !item.includes('experimental'))
+        .filter((item) => !item.includes('alpha'))
+        .filter((item) => !item.includes('resource'))
+        .reverse()
+        .slice(0, 50),
     },
   ]);
   let { toVersion } = await inquirer.prompt([
@@ -97,25 +105,53 @@ async function printLog() {
     const text = `${message} ${body}`;
 
     const match = text.match(/#\d+/g);
-    const prs = (match || []).map(pr => pr.slice(1));
+    const prs = (match || []).map((pr) => pr.slice(1));
     const validatePRs = [];
 
     console.log(
       `[${i + 1}/${logs.all.length}]`,
       hash.slice(0, 6),
       '-',
-      prs.length ? prs.map(pr => `#${pr}`).join(',') : '?',
+      prs.length ? prs.map((pr) => `#${pr}`).join(',') : '?',
     );
     for (let j = 0; j < prs.length; j += 1) {
       const pr = prs[j];
 
       // Use jquery to get full html page since it don't need auth token
-      const res = await fetch(`https://github.com/ant-design/ant-design/pull/${pr}`);
+      let res;
+      let tryTimes = 0;
+      const timeout = 30000;
+      let html;
+      const fetchPullRequest = async () => {
+        try {
+          res = await new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error(`Fetch timeout of ${timeout}ms exceeded`));
+            }, timeout);
+            fetch(`https://github.com/ant-design/ant-design/pull/${pr}`)
+              .then((response) => {
+                response.text().then((htmlRes) => {
+                  html = htmlRes;
+                  resolve(response);
+                });
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          });
+        } catch (err) {
+          tryTimes++;
+          if (tryTimes < 100) {
+            console.log(chalk.red(`❌ Fetch error, reason: ${err}`));
+            console.log(chalk.red(`⌛️ Retrying...(Retry times: ${tryTimes})`));
+            await fetchPullRequest();
+          }
+        }
+      };
+      await fetchPullRequest();
       if (res.url.includes('/issues/')) {
         continue;
       }
-
-      const html = await res.text();
 
       const $html = $(html);
 
@@ -131,8 +167,8 @@ async function printLog() {
         });
       });
 
-      const english = getDescription(lines.find(line => line.text.includes('🇺🇸 English')));
-      const chinese = getDescription(lines.find(line => line.text.includes('🇨🇳 Chinese')));
+      const english = getDescription(lines.find((line) => line.text.includes('🇺🇸 English')));
+      const chinese = getDescription(lines.find((line) => line.text.includes('🇨🇳 Chinese')));
       if (english) {
         console.log(`  🇨🇳  ${english}`);
       }
@@ -170,13 +206,16 @@ async function printLog() {
   console.log('\n', chalk.green('Done. Here is the log:'));
 
   function printPR(lang, postLang) {
-    prList.forEach(entity => {
+    prList.forEach((entity) => {
       const { pr, author, hash, title } = entity;
       if (pr) {
         const str = postLang(entity[lang]);
         let icon = '';
         if (str.toLowerCase().includes('fix') || str.includes('修复')) {
           icon = '🐞';
+        }
+        if (str.toLowerCase().includes('feat')) {
+          icon = '🆕';
         }
 
         let authorText = '';
@@ -199,7 +238,7 @@ async function printLog() {
   console.log('\n');
   console.log(chalk.yellow('🇨🇳 Chinese changelog:'));
   console.log('\n');
-  printPR('chinese', chinese =>
+  printPR('chinese', (chinese) =>
     chinese[chinese.length - 1] === '。' || !chinese ? chinese : `${chinese}。`,
   );
 
@@ -208,7 +247,7 @@ async function printLog() {
   // English
   console.log(chalk.yellow('🇺🇸 English changelog:'));
   console.log('\n');
-  printPR('english', english => {
+  printPR('english', (english) => {
     english = english.trim();
     if (english[english.length - 1] !== '.' || !english) {
       english = `${english}.`;
@@ -233,7 +272,7 @@ async function printLog() {
       shell: true,
     },
   );
-  ls.stdout.on('data', data => {
+  ls.stdout.on('data', (data) => {
     console.log(data.toString());
   });
 

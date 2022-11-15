@@ -1,16 +1,18 @@
 import React from 'react';
-import { mount, render } from 'enzyme';
+import userEvent from '@testing-library/user-event';
 import Alert from '..';
-import Button from '../../button';
-import Tooltip from '../../tooltip';
-import Popconfirm from '../../popconfirm';
+import accessibilityTest from '../../../tests/shared/accessibilityTest';
 import rtlTest from '../../../tests/shared/rtlTest';
-import { sleep } from '../../../tests/utils';
+import { render, act, screen } from '../../../tests/utils';
+import Button from '../../button';
+import Popconfirm from '../../popconfirm';
+import Tooltip from '../../tooltip';
 
 const { ErrorBoundary } = Alert;
 
 describe('Alert', () => {
   rtlTest(Alert);
+  accessibilityTest(Alert);
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -20,9 +22,9 @@ describe('Alert', () => {
     jest.useRealTimers();
   });
 
-  it('could be closed', () => {
+  it('should show close button and could be closed', async () => {
     const onClose = jest.fn();
-    const wrapper = mount(
+    render(
       <Alert
         message="Warning Text Warning Text Warning TextW arning Text Warning Text Warning TextWarning Text"
         type="warning"
@@ -30,100 +32,107 @@ describe('Alert', () => {
         onClose={onClose}
       />,
     );
-    wrapper.find('.ant-alert-close-icon').simulate('click');
-    jest.runAllTimers();
-    expect(onClose).toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: /close/i }));
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  describe('action of Alert', () => {
-    it('custom action', () => {
-      const wrapper = render(
-        <Alert
-          message="Success Tips"
-          type="success"
-          showIcon
-          action={
-            <Button size="small" type="text">
-              UNDO
-            </Button>
-          }
-          closable
-        />,
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
+  it('custom action', () => {
+    const { container } = render(
+      <Alert
+        message="Success Tips"
+        type="success"
+        showIcon
+        action={
+          <Button size="small" type="text">
+            UNDO
+          </Button>
+        }
+        closable
+      />,
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('data and aria props', () => {
-    it('sets data attributes on input', () => {
-      const wrapper = mount(<Alert data-test="test-id" data-id="12345" message={null} />);
-      const input = wrapper.find('.ant-alert').getDOMNode();
-      expect(input.getAttribute('data-test')).toBe('test-id');
-      expect(input.getAttribute('data-id')).toBe('12345');
-    });
-
-    it('sets aria attributes on input', () => {
-      const wrapper = mount(<Alert aria-describedby="some-label" message={null} />);
-      const input = wrapper.find('.ant-alert').getDOMNode();
-      expect(input.getAttribute('aria-describedby')).toBe('some-label');
-    });
-
-    it('sets role attribute on input', () => {
-      const wrapper = mount(<Alert role="status" message={null} />);
-      const input = wrapper.find('.ant-alert').getDOMNode();
-      expect(input.getAttribute('role')).toBe('status');
-    });
+  it('should sets data attributes on alert when pass attributes to props', () => {
+    render(
+      <Alert data-test="test-id" data-id="12345" aria-describedby="some-label" message={null} />,
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveAttribute('data-test', 'test-id');
+    expect(alert).toHaveAttribute('data-id', '12345');
+    expect(alert).toHaveAttribute('aria-describedby', 'some-label');
   });
 
-  it('ErrorBoundary', () => {
+  it('sets role attribute on input', () => {
+    render(<Alert role="status" message={null} />);
+
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('should show error as ErrorBoundary when children have error', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    // eslint-disable-next-line no-console
+    expect(console.error).toHaveBeenCalledTimes(0);
     // @ts-expect-error
     // eslint-disable-next-line react/jsx-no-undef
     const ThrowError = () => <NotExisted />;
-    const wrapper = mount(
+    render(
       <ErrorBoundary>
         <ThrowError />
       </ErrorBoundary>,
     );
-    // eslint-disable-next-line jest/no-standalone-expect
-    expect(wrapper.text()).toContain('ReferenceError: NotExisted is not defined');
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'ReferenceError: NotExisted is not defined',
+    );
+    // eslint-disable-next-line no-console
+    (console.error as any).mockRestore();
   });
 
   it('could be used with Tooltip', async () => {
-    const ref = React.createRef<any>();
-    jest.useRealTimers();
-    const wrapper = mount(
-      <Tooltip title="xxx" mouseEnterDelay={0} ref={ref}>
+    render(
+      <Tooltip title="xxx" mouseEnterDelay={0}>
         <Alert
           message="Warning Text Warning Text Warning TextW arning Text Warning Text Warning TextWarning Text"
           type="warning"
         />
       </Tooltip>,
     );
-    wrapper.find('.ant-alert').simulate('mouseenter');
-    await sleep(0);
-    expect(ref.current.getPopupDomNode()).toBeTruthy();
-    jest.useFakeTimers();
+
+    await userEvent.hover(screen.getByRole('alert'));
+
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
   });
 
   it('could be used with Popconfirm', async () => {
-    const ref = React.createRef<any>();
-    jest.useRealTimers();
-    const wrapper = mount(
-      <Popconfirm ref={ref} title="xxx">
+    render(
+      <Popconfirm title="xxx">
         <Alert
           message="Warning Text Warning Text Warning TextW arning Text Warning Text Warning TextWarning Text"
           type="warning"
         />
       </Popconfirm>,
     );
-    wrapper.find('.ant-alert').simulate('click');
-    await sleep(0);
-    expect(ref.current.getPopupDomNode()).toBeTruthy();
-    jest.useFakeTimers();
+    await userEvent.click(screen.getByRole('alert'));
+
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
   });
 
   it('could accept none react element icon', () => {
-    const wrapper = mount(<Alert message="Success Tips" type="success" showIcon icon="icon" />);
-    expect(wrapper).toMatchRenderedSnapshot();
+    render(<Alert message="Success Tips" type="success" showIcon icon="icon" />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/success tips/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/icon/i);
+  });
+
+  it('should not render message div when no message', () => {
+    const { container } = render(<Alert description="description" />);
+    expect(!!container.querySelector('.ant-alert-message')).toBe(false);
   });
 });

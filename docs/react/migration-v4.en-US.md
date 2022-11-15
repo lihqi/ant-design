@@ -141,7 +141,9 @@ const Demo = () => (
 - Table rewrite.
   - will keep at least one column even if `columns` is empty.
   - Nest `dataIndex` definition changes from `'xxx.yyy'` to `['xxx', 'yyy']`.
-- Pagination will default set `showSizeChanger` to `true` since `4.1.0`. This change also applied on Table component.
+- Pagination
+  - will default set `showSizeChanger` to `true` since `4.1.0`. This change also applied on Table component.
+  - `onChange` will also trigger when `pageSize` value changed.
 - Tabs rewrite. ([4.3.0](https://github.com/ant-design/ant-design/pull/24552))
   - Dom structrue is changed, please check style if you override tabs css.
   - `onPrevClick` 和 `onNextClick` would be not working anymore since we improve tabs scroll behavior.
@@ -189,6 +191,14 @@ For parts that cannot be modified automatically, codemod will prompt on the comm
 ### Migration tool modification details
 
 `@ant-design/codemod-v4` will help you migrate to antd v4. Obsolete components will be kept running through @ant-design/compatible. Generally, you don't need to migrate manually. The following sections detail the overall migration and changes.
+
+#### Install compatible package
+
+Install `@ant-design/compatible` with `v4-compatible-v3` tag:
+
+```bash
+npm install --save @ant-design/compatible@v4-compatible-v3
+```
 
 #### Import the obsolete Form and Mention components via @ant-design/compatible package
 

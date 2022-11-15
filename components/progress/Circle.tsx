@@ -1,35 +1,28 @@
-import * as React from 'react';
-import { Circle as RCCircle } from 'rc-progress';
 import { presetPrimaryColors } from '@ant-design/colors';
 import classNames from 'classnames';
-import { validProgress, getSuccessPercent } from './utils';
-import { ProgressProps } from './progress';
+import { Circle as RCCircle } from 'rc-progress';
+import * as React from 'react';
+import type { ProgressGradient, ProgressProps } from './progress';
+import { getSuccessPercent, validProgress } from './utils';
 
 interface CircleProps extends ProgressProps {
   prefixCls: string;
   children: React.ReactNode;
   progressStatus: string;
+  strokeColor?: string | ProgressGradient;
 }
 
 function getPercentage({ percent, success, successPercent }: CircleProps) {
-  const ptg = validProgress(percent);
-  const realSuccessPercent = getSuccessPercent({ success, successPercent });
-  if (!realSuccessPercent) {
-    return ptg;
-  }
-  return [
-    validProgress(realSuccessPercent),
-    validProgress(ptg - validProgress(realSuccessPercent)),
-  ];
+  const realSuccessPercent = validProgress(getSuccessPercent({ success, successPercent }));
+  return [realSuccessPercent, validProgress(validProgress(percent) - realSuccessPercent)];
 }
 
-function getStrokeColor({ success, strokeColor, successPercent }: CircleProps) {
-  const color = strokeColor || null;
-  const realSuccessPercent = getSuccessPercent({ success, successPercent });
-  if (!realSuccessPercent) {
-    return color;
-  }
-  return [presetPrimaryColors.green, color];
+function getStrokeColor({
+  success = {},
+  strokeColor,
+}: Partial<CircleProps>): (string | Record<string, string>)[] {
+  const { strokeColor: successColor } = success;
+  return [successColor || presetPrimaryColors.green, strokeColor || null!];
 }
 
 const Circle: React.FC<CircleProps> = props => {
@@ -37,12 +30,13 @@ const Circle: React.FC<CircleProps> = props => {
     prefixCls,
     width,
     strokeWidth,
-    trailColor,
-    strokeLinecap,
+    trailColor = null as any,
+    strokeLinecap = 'round',
     gapPosition,
     gapDegree,
     type,
     children,
+    success,
   } = props;
   const circleSize = width || 120;
   const circleStyle = {
@@ -51,7 +45,7 @@ const Circle: React.FC<CircleProps> = props => {
     fontSize: circleSize * 0.15 + 6,
   } as React.CSSProperties;
   const circleWidth = strokeWidth || 6;
-  const gapPos = gapPosition || (type === 'dashboard' && 'bottom') || 'top';
+  const gapPos = gapPosition || (type === 'dashboard' && 'bottom') || undefined;
 
   const getGapDegree = () => {
     // Support gapDeg = 0 when type = 'dashboard'
@@ -65,8 +59,8 @@ const Circle: React.FC<CircleProps> = props => {
   };
 
   // using className to style stroke color
-  const strokeColor = getStrokeColor(props) as string | string[] | object;
-  const isGradient = Object.prototype.toString.call(strokeColor) === '[object Object]';
+  const isGradient = Object.prototype.toString.call(props.strokeColor) === '[object Object]';
+  const strokeColor = getStrokeColor({ success, strokeColor: props.strokeColor });
 
   const wrapperClassName = classNames(`${prefixCls}-inner`, {
     [`${prefixCls}-circle-gradient`]: isGradient,

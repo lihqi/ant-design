@@ -1,5 +1,5 @@
 ---
-order: 7.1
+order: 7.5
 title: 替换 Moment.js
 ---
 
@@ -19,9 +19,8 @@ title: 替换 Moment.js
 
 ```tsx
 import { Dayjs } from 'dayjs';
-import dayjsGenerateConfig from 'rc-picker/lib/generate/dayjs';
+import dayjsGenerateConfig from 'rc-picker/es/generate/dayjs';
 import generatePicker from 'antd/es/date-picker/generatePicker';
-import 'antd/es/date-picker/style/index';
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 
@@ -39,7 +38,6 @@ import { Dayjs } from 'dayjs';
 import * as React from 'react';
 import DatePicker from './DatePicker';
 import { PickerTimeProps } from 'antd/es/date-picker/generatePicker';
-import { Omit } from 'antd/es/_util/type';
 
 export interface TimePickerProps extends Omit<PickerTimeProps<Dayjs>, 'picker'> {}
 
@@ -60,9 +58,8 @@ export default TimePicker;
 
 ```tsx
 import { Dayjs } from 'dayjs';
-import dayjsGenerateConfig from 'rc-picker/lib/generate/dayjs';
+import dayjsGenerateConfig from 'rc-picker/es/generate/dayjs';
 import generateCalendar from 'antd/es/calendar/generateCalendar';
-import 'antd/es/calendar/style';
 
 const Calendar = generateCalendar<Dayjs>(dayjsGenerateConfig);
 
@@ -126,7 +123,7 @@ module.exports = {
 编写如下代码:
 
 ```tsx
-import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
+import dateFnsGenerateConfig from 'rc-picker/es/generate/dateFns';
 import generatePicker from 'antd/es/date-picker/generatePicker';
 import 'antd/es/date-picker/style/index';
 

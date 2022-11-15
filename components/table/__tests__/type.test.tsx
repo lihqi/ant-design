@@ -1,6 +1,7 @@
 import * as React from 'react';
+import type { ColumnProps } from '..';
+import type { TreeColumnFilterItem } from '../hooks/useFilter/FilterDropdown';
 import Table from '../Table';
-import { ColumnProps } from '..';
 
 const { Column, ColumnGroup } = Table;
 
@@ -28,6 +29,14 @@ describe('Table.typescript', () => {
     const table = <Table rowSelection={{ selections: [Table.SELECTION_ALL] }} />;
     expect(table).toBeTruthy();
   });
+
+  it('generic', () => {
+    interface RecordType {
+      key: string;
+    }
+    const table = <Table<RecordType> dataSource={[{ key: 'Bamboo' }]} />;
+    expect(table).toBeTruthy();
+  });
 });
 
 describe('Table.typescript types', () => {
@@ -40,6 +49,8 @@ describe('Table.typescript types', () => {
       {
         title: 'Name',
         dataIndex: 'name',
+        filterSearch: (input: any, record: TreeColumnFilterItem) =>
+          (record.title as string).includes(input),
       },
     ];
 

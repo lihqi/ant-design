@@ -13,15 +13,27 @@ cover: https://gw.alipayobjects.com/zos/antfincdn/UZYqMizXHaj/Steps.svg
 
 当任务复杂或者存在先后关系时，将其分解成一系列步骤，从而简化任务。
 
-## API
+### 4.24.0 用法升级
+
+```__react
+import Alert from '../alert';
+ReactDOM.render(<Alert message="在 4.24.0 版本后，我们提供了 <Steps items={[...]} /> 的简写方式，有更好的性能和更方便的数据组织方式，开发者不再需要自行拼接 JSX。同时我们废弃了原先的写法，你还是可以在 4.x 继续使用，但会在控制台看到警告，并会在 5.0 后移除。" />, mountNode);
+```
 
 ```jsx
+// >=4.24.0 可用，推荐的写法 ✅
+const items = [{ title: '第一步' }, { title: '第二步' }, { title: '第三步' }];
+return <Steps items={items} />;
+
+// <4.24.0 可用，>=4.24.0 时不推荐 🙅🏻‍♀️
 <Steps>
   <Step title="第一步" />
   <Step title="第二步" />
   <Step title="第三步" />
-</Steps>
+</Steps>;
 ```
+
+## API
 
 ### Steps
 
@@ -36,13 +48,14 @@ cover: https://gw.alipayobjects.com/zos/antfincdn/UZYqMizXHaj/Steps.svg
 | labelPlacement | 指定标签放置位置，默认水平放图标右侧，可选 `vertical` 放图标下方 | string | `horizontal` |  |
 | percent | 当前 `process` 步骤显示的进度条进度（只对基本类型的 Steps 生效） | number | - | 4.5.0 |
 | progressDot | 点状步骤条，可以设置为一个 function，labelPlacement 将强制为 `vertical` | boolean \| (iconDot, {index, status, title, description}) => ReactNode | false |  |
-| responsive | 当屏幕宽度小于 532px 时自动变为垂直模式 | boolean | - | true |
+| responsive | 当屏幕宽度小于 `532px` 时自动变为垂直模式 | boolean | true |  |
 | size | 指定大小，目前支持普通（`default`）和迷你（`small`） | string | `default` |  |
 | status | 指定当前步骤的状态，可选 `wait` `process` `finish` `error` | string | `process` |  |
 | type | 步骤条类型，有 `default` 和 `navigation` 两种 | string | `default` |  |
 | onChange | 点击切换步骤时触发 | (current) => void | - |  |
+| items | 配置选项卡内容 | [StepItem](#StepItem) | [] | 4.24.0 |
 
-### Steps.Step
+### StepItem
 
 步骤条内的每一个步骤。
 

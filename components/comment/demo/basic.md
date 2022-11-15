@@ -13,16 +13,15 @@ title:
 
 A basic comment with author, avatar, time and actions.
 
-```jsx
+```tsx
+import { DislikeFilled, DislikeOutlined, LikeFilled, LikeOutlined } from '@ant-design/icons';
+import { Avatar, Comment, Tooltip } from 'antd';
 import React, { createElement, useState } from 'react';
-import { Comment, Tooltip, Avatar } from 'antd';
-import moment from 'moment';
-import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons';
 
-const Demo = () => {
+const App: React.FC = () => {
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
-  const [action, setAction] = useState(null);
+  const [action, setAction] = useState<string | null>(null);
 
   const like = () => {
     setLikes(1);
@@ -56,12 +55,7 @@ const Demo = () => {
     <Comment
       actions={actions}
       author={<a>Han Solo</a>}
-      avatar={
-        <Avatar
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-          alt="Han Solo"
-        />
-      }
+      avatar={<Avatar src="https://joeschmoe.io/api/v1/random" alt="Han Solo" />}
       content={
         <p>
           We supply a series of design principles, practical patterns and high quality design
@@ -70,15 +64,15 @@ const Demo = () => {
         </p>
       }
       datetime={
-        <Tooltip title={moment().format('YYYY-MM-DD HH:mm:ss')}>
-          <span>{moment().fromNow()}</span>
+        <Tooltip title="2016-11-22 11:22:33">
+          <span>8 hours ago</span>
         </Tooltip>
       }
     />
   );
 };
 
-ReactDOM.render(<Demo />, mountNode);
+export default App;
 ```
 
 ```css

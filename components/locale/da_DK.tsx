@@ -1,8 +1,8 @@
 import Pagination from 'rc-pagination/lib/locale/da_DK';
-import DatePicker from '../date-picker/locale/da_DK';
-import TimePicker from '../time-picker/locale/da_DK';
 import Calendar from '../calendar/locale/da_DK';
-import { Locale } from '../locale-provider';
+import DatePicker from '../date-picker/locale/da_DK';
+import type { Locale } from '../locale-provider';
+import TimePicker from '../time-picker/locale/da_DK';
 
 const localeValues: Locale = {
   locale: 'da',
@@ -14,8 +14,18 @@ const localeValues: Locale = {
     filterTitle: 'Filtermenu',
     filterConfirm: 'OK',
     filterReset: 'Nulstil',
+    filterEmptyText: 'Ingen filtre',
+    emptyText: 'Ingen data',
     selectAll: 'Vælg alle',
-    selectInvert: 'Inverter valg',
+    selectNone: 'Ryd alt data',
+    selectInvert: 'Invertér valg',
+    selectionAll: 'Vælg alt data',
+    sortTitle: 'Sortér',
+    expand: 'Udvid række',
+    collapse: 'Flet række',
+    triggerDesc: 'Klik for at sortere faldende',
+    triggerAsc: 'Klik for at sortere stigende',
+    cancelSort: 'Klik for at annullere sortering',
   },
   Modal: {
     okText: 'OK',
@@ -27,6 +37,7 @@ const localeValues: Locale = {
     cancelText: 'Afbryd',
   },
   Transfer: {
+    titles: ['', ''],
     searchPlaceholder: 'Søg her',
     itemUnit: 'element',
     itemsUnit: 'elementer',

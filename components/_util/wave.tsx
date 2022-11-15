@@ -1,8 +1,9 @@
-import * as React from 'react';
 import { updateCSS } from 'rc-util/lib/Dom/dynamicCSS';
-import { supportRef, composeRef } from 'rc-util/lib/ref';
+import { composeRef, supportRef } from 'rc-util/lib/ref';
+import * as React from 'react';
+import type { ConfigConsumerProps, CSPConfig } from '../config-provider';
+import { ConfigConsumer, ConfigContext } from '../config-provider';
 import raf from './raf';
-import { ConfigConsumer, ConfigConsumerProps, CSPConfig, ConfigContext } from '../config-provider';
 import { cloneElement } from './reactNode';
 
 let styleForPseudo: HTMLStyleElement | null;
@@ -15,6 +16,16 @@ function isHidden(element: HTMLElement) {
   return !element || element.offsetParent === null || element.hidden;
 }
 
+function getValidateContainer(nodeRoot: Node): Element {
+  if (nodeRoot instanceof Document) {
+    return nodeRoot.body;
+  }
+
+  return Array.from(nodeRoot.childNodes).find(
+    ele => ele?.nodeType === Node.ELEMENT_NODE,
+  ) as Element;
+}
+
 function isNotGrey(color: string) {
   // eslint-disable-next-line no-useless-escape
   const match = (color || '').match(/rgba?\((\d*), (\d*), (\d*)(, [\d.]*)?\)/);
@@ -24,7 +35,13 @@ function isNotGrey(color: string) {
   return true;
 }
 
-export default class Wave extends React.Component<{ insertExtraNode?: boolean }> {
+export interface WaveProps {
+  insertExtraNode?: boolean;
+  disabled?: boolean;
+  children?: React.ReactNode;
+}
+
+class Wave extends React.Component<WaveProps> {
   static contextType = ConfigContext;
 
   private instance?: {
@@ -48,6 +65,7 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
   context: ConfigConsumerProps;
 
   componentDidMount() {
+    this.destroyed = false;
     const node = this.containerRef.current as HTMLDivElement;
     if (!node || node.nodeType !== 1) {
       return;
@@ -67,10 +85,12 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
   }
 
   onClick = (node: HTMLElement, waveColor: string) => {
-    if (!node || isHidden(node) || node.className.indexOf('-leave') >= 0) {
+    const { insertExtraNode, disabled } = this.props;
+
+    if (disabled || !node || isHidden(node) || node.className.includes('-leave')) {
       return;
     }
-    const { insertExtraNode } = this.props;
+
     this.extraNode = document.createElement('div');
     const { extraNode } = this;
     const { getPrefixCls } = this.context;
@@ -80,13 +100,18 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
     // Not white or transparent or grey
     if (
       waveColor &&
+      waveColor !== '#fff' &&
       waveColor !== '#ffffff' &&
       waveColor !== 'rgb(255, 255, 255)' &&
+      waveColor !== 'rgba(255, 255, 255, 1)' &&
       isNotGrey(waveColor) &&
       !/rgba\((?:\d*, ){3}0\)/.test(waveColor) && // any transparent rgba color
       waveColor !== 'transparent'
     ) {
       extraNode.style.borderColor = waveColor;
+
+      const nodeRoot = node.getRootNode?.() || node.ownerDocument;
+      const nodeBody = getValidateContainer(nodeRoot) ?? nodeRoot;
 
       styleForPseudo = updateCSS(
         `
@@ -96,7 +121,7 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
         --antd-wave-shadow-color: ${waveColor};
       }`,
         'antd-wave',
-        { csp: this.csp },
+        { csp: this.csp, attachTo: nodeBody },
       );
     }
     if (insertExtraNode) {
@@ -135,12 +160,12 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
       : `${getPrefixCls('')}-click-animating-without-extra-node`;
   }
 
-  bindAnimationEvent = (node: HTMLElement) => {
+  bindAnimationEvent = (node?: HTMLElement) => {
     if (
       !node ||
       !node.getAttribute ||
       node.getAttribute('disabled') ||
-      node.className.indexOf('disabled') >= 0
+      node.className.includes('disabled')
     ) {
       return;
     }
@@ -212,3 +237,5 @@ export default class Wave extends React.Component<{ insertExtraNode?: boolean }>
     return <ConfigConsumer>{this.renderWave}</ConfigConsumer>;
   }
 }
+
+export default Wave;

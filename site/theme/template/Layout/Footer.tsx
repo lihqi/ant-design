@@ -1,9 +1,8 @@
-import React from 'react';
-import { FormattedMessage, injectIntl, WrappedComponentProps } from 'react-intl';
-import { Modal, message } from 'antd';
-import { Link } from 'bisheng/router';
+import React, { useMemo } from 'react';
 import RcFooter from 'rc-footer';
-import { presetPalettes } from '@ant-design/colors';
+import { Link } from 'bisheng/router';
+import type { WrappedComponentProps } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import {
   AntDesignOutlined,
   MediumOutlined,
@@ -15,44 +14,19 @@ import {
   ProfileOutlined,
   BugOutlined,
   IssuesCloseOutlined,
-  BookOutlined,
   QuestionCircleOutlined,
+  BgColorsOutlined,
 } from '@ant-design/icons';
-import { isLocalStorageNameSupported, loadScript, getLocalizedPathname } from '../utils';
-import ColorPicker from '../Color/ColorPicker';
+import type { FooterColumn } from 'rc-footer/lib/column';
+import { getLocalizedPathname } from '../utils';
 
-class Footer extends React.Component<WrappedComponentProps & { location: any }> {
-  lessLoaded = false;
-
-  state = {
-    color: presetPalettes.blue.primary,
-  };
-
-  componentDidMount() {
-    // for some iOS
-    // http://stackoverflow.com/a/14555361
-    if (!isLocalStorageNameSupported()) {
-      return;
-    }
-    // 大版本发布后全局弹窗提示
-    //   1. 点击『知道了』之后不再提示
-    //   2. 超过截止日期后不再提示
-    if (
-      localStorage.getItem('antd@3.0.0-notification-sent') !== 'true' &&
-      Date.now() < new Date('2017/12/20').getTime()
-    ) {
-      this.infoNewVersion();
-    }
-  }
-
-  getColumns() {
-    const { intl, location } = this.props;
-
+const Footer: React.FC<WrappedComponentProps & { location: any }> = props => {
+  const { intl, location } = props;
+  const getColumns = useMemo<FooterColumn[]>(() => {
     const isZhCN = intl.locale === 'zh-CN';
-
     const getLinkHash = (path: string, hash: { zhCN: string; enUS: string }) => {
       const pathName = getLocalizedPathname(path, isZhCN, location.query, hash);
-      const { pathname, query } = pathName;
+      const { pathname, query = {} } = pathName;
       const pathnames = pathname.split('#');
       if ('direction' in query) {
         return `${pathnames[0]}?direction=rtl#${pathnames[1]}`;
@@ -62,7 +36,7 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
 
     const getLink = (path: string) => {
       const pathName = getLocalizedPathname(path, isZhCN, location.query);
-      const { pathname, query } = pathName;
+      const { pathname, query = {} } = pathName;
       if ('direction' in query) {
         return `${pathname}?direction=rtl}`;
       }
@@ -73,34 +47,23 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
       title: <FormattedMessage id="app.footer.resources" />,
       items: [
         {
-          title: 'Ant Design Pro',
-          url: 'https://pro.ant.design',
-          openExternal: true,
-        },
-        {
           title: 'Ant Design Charts',
           url: 'https://charts.ant.design',
           openExternal: true,
         },
         {
+          title: 'Ant Design Pro',
+          url: 'https://pro.ant.design',
+          openExternal: true,
+        },
+        {
+          title: 'Ant Design Pro Components',
+          url: 'https://procomponents.ant.design',
+          openExternal: true,
+        },
+        {
           title: 'Ant Design Mobile',
           url: 'https://mobile.ant.design',
-          openExternal: true,
-        },
-        {
-          title: 'NG-ZORRO',
-          description: 'Ant Design of Angular',
-          url: 'https://ng.ant.design',
-          openExternal: true,
-        },
-        {
-          title: 'NG-ZORRO-MOBILE',
-          url: 'https://ng.mobile.ant.design',
-          openExternal: true,
-        },
-        {
-          title: 'Ant Design Vue',
-          url: 'https://vue.ant.design',
           openExternal: true,
         },
         {
@@ -128,9 +91,9 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           openExternal: true,
         },
         {
-          title: 'Remax',
-          description: <FormattedMessage id="app.footer.remax" />,
-          url: 'https://remaxjs.org/',
+          title: 'qiankun',
+          description: <FormattedMessage id="app.footer.qiankun" />,
+          url: 'https://qiankun.umijs.org',
           openExternal: true,
         },
         {
@@ -144,14 +107,6 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           description: <FormattedMessage id="app.footer.motion" />,
           url: 'https://motion.ant.design',
           openExternal: true,
-        },
-        {
-          title: <FormattedMessage id="app.footer.design-resources" />,
-          url: getLinkHash('/docs/resources', {
-            zhCN: '设计资源',
-            enUS: 'Design-Resources',
-          }),
-          LinkComponent: Link,
         },
         {
           title: <FormattedMessage id="app.footer.chinamirror" />,
@@ -217,7 +172,7 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           enUS: 'JoinUs',
         }),
         LinkComponent: Link,
-      } as any);
+      } as unknown as typeof col2['items'][number]);
     }
 
     const col3 = {
@@ -251,12 +206,6 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           icon: <IssuesCloseOutlined />,
           title: <FormattedMessage id="app.footer.issues" />,
           url: 'https://github.com/ant-design/ant-design/issues',
-          openExternal: true,
-        },
-        {
-          icon: <BookOutlined />,
-          title: <FormattedMessage id="app.footer.course" />,
-          url: 'https://www.yuque.com/ant-design/course',
           openExternal: true,
         },
         {
@@ -349,122 +298,33 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           openExternal: true,
         },
         {
-          title: this.renderThemeChanger(),
-          style: {
-            marginTop: 20,
-          },
+          icon: <BgColorsOutlined />,
+          title: <FormattedMessage id="app.footer.theme" />,
+          url: getLinkHash('/components/config-provider/', {
+            zhCN: 'components-config-provider-demo-theme',
+            enUS: 'components-config-provider-demo-theme',
+          }),
+          LinkComponent: Link,
         },
       ],
     };
-
     return [col1, col2, col3, col4];
-  }
+  }, [intl.locale, location.query]);
 
-  handleColorChange = (color: string) => {
-    const {
-      intl: { messages },
-    } = this.props;
-    message.loading({
-      content: messages['app.footer.primary-color-changing'],
-      key: 'change-primary-color',
-    });
-    const changeColor = () => {
-      (window as any).less
-        .modifyVars({
-          '@primary-color': color,
-        })
-        .then(() => {
-          message.success({
-            content: messages['app.footer.primary-color-changed'],
-            key: 'change-primary-color',
-          });
-          this.setState({ color });
-        });
-    };
-
-    const lessUrl = 'https://gw.alipayobjects.com/os/lib/less/3.10.3/dist/less.min.js';
-
-    if (this.lessLoaded) {
-      changeColor();
-    } else {
-      (window as any).less = {
-        async: true,
-        javascriptEnabled: true,
-      };
-      loadScript(lessUrl).then(() => {
-        this.lessLoaded = true;
-        changeColor();
-      });
-    }
-  };
-
-  infoNewVersion() {
-    const {
-      intl: { messages },
-    } = this.props;
-    Modal.info({
-      title: messages['app.publish.title'],
-      content: (
-        <div>
-          <img
-            src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg"
-            alt="Ant Design"
-          />
-          <p>
-            {messages['app.publish.greeting']}
-            <a target="_blank" rel="noopener noreferrer" href="/changelog">
-              antd@3.0.0
-            </a>
-            {messages['app.publish.intro']}
-            {messages['app.publish.old-version-guide']}
-            <a target="_blank" rel="noopener noreferrer" href="http://2x.ant.design">
-              2x.ant.design
-            </a>
-            {messages['app.publish.old-version-tips']}
-          </p>
-        </div>
-      ),
-      okText: 'OK',
-      onOk: () => localStorage.setItem('antd@3.0.0-notification-sent', 'true'),
-      className: 'new-version-info-modal',
-      width: 470,
-    });
-  }
-
-  renderThemeChanger() {
-    const { color } = this.state;
-    const colors = Object.keys(presetPalettes).filter(item => item !== 'grey');
-    return (
-      <ColorPicker
-        small
-        color={color}
-        position="top"
-        presetColors={[
-          ...colors.map(c => presetPalettes[c][5]),
-          ...colors.map(c => presetPalettes[c][4]),
-          ...colors.map(c => presetPalettes[c][6]),
-        ]}
-        onChangeComplete={this.handleColorChange}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <RcFooter
-        columns={this.getColumns()}
-        bottom={
-          <>
-            Made with <span style={{ color: '#fff' }}>❤</span> by
-            {/* eslint-disable-next-line react/jsx-curly-brace-presence */}{' '}
-            <a target="_blank" rel="noopener noreferrer" href="https://xtech.antfin.com">
-              <FormattedMessage id="app.footer.company" />
-            </a>
-          </>
-        }
-      />
-    );
-  }
-}
+  return (
+    <RcFooter
+      columns={getColumns}
+      bottom={
+        <>
+          Made with <span style={{ color: '#fff' }}>❤</span> by
+          {/* eslint-disable-next-line react/jsx-curly-brace-presence */}{' '}
+          <a target="_blank" rel="noopener noreferrer" href="https://xtech.antfin.com">
+            <FormattedMessage id="app.footer.company" />
+          </a>
+        </>
+      }
+    />
+  );
+};
 
 export default injectIntl(Footer);

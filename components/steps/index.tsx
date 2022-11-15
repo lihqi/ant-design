@@ -1,30 +1,13 @@
-import * as React from 'react';
-import omit from 'rc-util/lib/omit';
-import RcSteps from 'rc-steps';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
 import classNames from 'classnames';
+import RcSteps from 'rc-steps';
+import type { ProgressDotRender } from 'rc-steps/lib/Steps';
+import * as React from 'react';
 import { ConfigContext } from '../config-provider';
-import Progress from '../progress';
 import useBreakpoint from '../grid/hooks/useBreakpoint';
-
-export interface StepsProps {
-  type?: 'default' | 'navigation';
-  className?: string;
-  current?: number;
-  direction?: 'horizontal' | 'vertical';
-  iconPrefix?: string;
-  initial?: number;
-  labelPlacement?: 'horizontal' | 'vertical';
-  prefixCls?: string;
-  progressDot?: boolean | Function;
-  responsive?: boolean;
-  size?: 'default' | 'small';
-  status?: 'wait' | 'process' | 'finish' | 'error';
-  style?: React.CSSProperties;
-  percent?: number;
-  onChange?: (current: number) => void;
-}
+import Progress from '../progress';
+import useLegacyItems from './useLegacyItems';
 
 export interface StepProps {
   className?: string;
@@ -38,22 +21,54 @@ export interface StepProps {
   style?: React.CSSProperties;
 }
 
+export interface StepsProps {
+  type?: 'default' | 'navigation';
+  className?: string;
+  current?: number;
+  direction?: 'horizontal' | 'vertical';
+  iconPrefix?: string;
+  initial?: number;
+  labelPlacement?: 'horizontal' | 'vertical';
+  prefixCls?: string;
+  progressDot?: boolean | ProgressDotRender;
+  responsive?: boolean;
+  size?: 'default' | 'small';
+  status?: 'wait' | 'process' | 'finish' | 'error';
+  style?: React.CSSProperties;
+  percent?: number;
+  onChange?: (current: number) => void;
+  children?: React.ReactNode;
+  items?: StepProps[];
+}
+
 interface StepsType extends React.FC<StepsProps> {
-  Step: React.ClassicComponentClass<StepProps>;
+  Step: typeof RcSteps.Step;
 }
 
 const Steps: StepsType = props => {
-  const { percent, size, className, direction, responsive } = props;
-  const { xs } = useBreakpoint();
+  const {
+    percent,
+    size,
+    className,
+    direction,
+    items,
+    responsive = true,
+    current = 0,
+    children,
+    ...restProps
+  } = props;
+  const { xs } = useBreakpoint(responsive);
   const { getPrefixCls, direction: rtlDirection } = React.useContext(ConfigContext);
 
-  const getDirection = React.useCallback(() => (responsive && xs ? 'vertical' : direction), [
-    xs,
-    direction,
-  ]);
+  const getDirection = React.useCallback(
+    () => (responsive && xs ? 'vertical' : direction),
+    [xs, direction],
+  );
 
   const prefixCls = getPrefixCls('steps', props.prefixCls);
   const iconPrefix = getPrefixCls('', props.iconPrefix);
+  const mergedItems = useLegacyItems(items, children);
+
   const stepsClassName = classNames(
     {
       [`${prefixCls}-rtl`]: rtlDirection === 'rtl',
@@ -65,6 +80,7 @@ const Steps: StepsType = props => {
     finish: <CheckOutlined className={`${prefixCls}-finish-icon`} />,
     error: <CloseOutlined className={`${prefixCls}-error-icon`} />,
   };
+
   const stepIconRender = ({
     node,
     status,
@@ -78,7 +94,8 @@ const Steps: StepsType = props => {
     if (status === 'process' && percent !== undefined) {
       // currently it's hard-coded, since we can't easily read the actually width of icon
       const progressWidth = size === 'small' ? 32 : 40;
-      const iconWithProgress = (
+      // iconWithProgress
+      return (
         <div className={`${prefixCls}-progress-icon`}>
           <Progress
             type="circle"
@@ -90,14 +107,17 @@ const Steps: StepsType = props => {
           {node}
         </div>
       );
-      return iconWithProgress;
     }
     return node;
   };
+
   return (
     <RcSteps
       icons={icons}
-      {...omit(props, ['percent', 'responsive'])}
+      {...restProps}
+      current={current}
+      size={size}
+      items={mergedItems}
       direction={getDirection()}
       stepIcon={stepIconRender}
       prefixCls={prefixCls}
@@ -108,9 +128,5 @@ const Steps: StepsType = props => {
 };
 
 Steps.Step = RcSteps.Step;
-
-Steps.defaultProps = {
-  current: 0,
-};
 
 export default Steps;

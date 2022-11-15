@@ -1,5 +1,5 @@
-import * as React from 'react';
 import classNames from 'classnames';
+import * as React from 'react';
 
 export interface UnitNumberProps {
   prefixCls: string;
@@ -20,14 +20,14 @@ function UnitNumber({ prefixCls, value, current, offset = 0 }: UnitNumberProps) 
   }
 
   return (
-    <p
+    <span
       style={style}
       className={classNames(`${prefixCls}-only-unit`, {
         current,
       })}
     >
       {value}
-    </p>
+    </span>
   );
 }
 

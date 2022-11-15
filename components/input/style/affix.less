@@ -1,5 +1,6 @@
-@import './index';
 @import './mixin';
+@import (reference) '../../style/themes/index';
+@input-prefix-cls: ~'@{ant-prefix}-input';
 
 @input-affix-margin: 4px;
 
@@ -27,13 +28,17 @@
       }
     }
 
-    > input.@{ant-prefix}-input {
-      padding: 0;
+    > .@{ant-prefix}-input {
+      font-size: inherit;
       border: none;
       outline: none;
 
       &:focus {
-        box-shadow: none;
+        box-shadow: none !important;
+      }
+
+      &:not(textarea) {
+        padding: 0;
       }
     }
 
@@ -49,6 +54,18 @@
     display: flex;
     flex: none;
     align-items: center;
+
+    > *:not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+
+  &-show-count-suffix {
+    color: @text-color-secondary;
+  }
+
+  &-show-count-has-suffix {
+    margin-right: 2px;
   }
 
   &-prefix {

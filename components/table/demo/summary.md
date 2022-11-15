@@ -7,18 +7,33 @@ title:
 
 ## zh-CN
 
-通过 `summary` 设置总结栏。使用 `Table.Summary.Cell` 同步 Column 的固定状态。
+通过 `summary` 设置总结栏。使用 `Table.Summary.Cell` 同步 Column 的固定状态。你可以通过配置 `Table.Summary` 的 `fixed` 属性使其固定(`4.16.0` 支持)。
 
 ## en-US
 
-Set summary content by `summary` prop. Sync column fixed status with `Table.Summary.Cell`.
+Set summary content by `summary` prop. Sync column fixed status with `Table.Summary.Cell`. You can fixed it by set `Table.Summary` `fixed` prop(since `4.16.0`).
 
-```jsx
+```tsx
 import { Table, Typography } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import React from 'react';
 
 const { Text } = Typography;
 
-const columns = [
+interface DataType {
+  key: string;
+  name: string;
+  borrow: number;
+  repayment: number;
+}
+
+interface FixedDataType {
+  key: React.Key;
+  name: string;
+  description: string;
+}
+
+const columns: ColumnsType<DataType> = [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -33,7 +48,7 @@ const columns = [
   },
 ];
 
-const data = [
+const data: DataType[] = [
   {
     key: '1',
     name: 'John Brown',
@@ -60,7 +75,7 @@ const data = [
   },
 ];
 
-const fixedColumns = [
+const fixedColumns: ColumnsType<FixedDataType> = [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -73,16 +88,16 @@ const fixedColumns = [
   },
 ];
 
-const fixedData = [];
-for (let i = 0; i < 6; i += 1) {
+const fixedData: FixedDataType[] = [];
+for (let i = 0; i < 20; i += 1) {
   fixedData.push({
     key: i,
-    name: i % 2 ? 'Light' : 'Bamboo',
+    name: ['Light', 'Bamboo', 'Little'][i % 3],
     description: 'Everything that has a beginning, has an end.',
   });
 }
 
-ReactDOM.render(
+const App: React.FC = () => (
   <>
     <Table
       columns={columns}
@@ -101,17 +116,17 @@ ReactDOM.render(
         return (
           <>
             <Table.Summary.Row>
-              <Table.Summary.Cell>Total</Table.Summary.Cell>
-              <Table.Summary.Cell>
+              <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
+              <Table.Summary.Cell index={1}>
                 <Text type="danger">{totalBorrow}</Text>
               </Table.Summary.Cell>
-              <Table.Summary.Cell>
+              <Table.Summary.Cell index={2}>
                 <Text>{totalRepayment}</Text>
               </Table.Summary.Cell>
             </Table.Summary.Row>
             <Table.Summary.Row>
-              <Table.Summary.Cell>Balance</Table.Summary.Cell>
-              <Table.Summary.Cell colSpan={2}>
+              <Table.Summary.Cell index={0}>Balance</Table.Summary.Cell>
+              <Table.Summary.Cell index={1} colSpan={2}>
                 <Text type="danger">{totalBorrow - totalRepayment}</Text>
               </Table.Summary.Cell>
             </Table.Summary.Row>
@@ -126,18 +141,21 @@ ReactDOM.render(
       columns={fixedColumns}
       dataSource={fixedData}
       pagination={false}
-      scroll={{ x: 2000 }}
+      scroll={{ x: 2000, y: 500 }}
       bordered
       summary={() => (
-        <Table.Summary.Row>
-          <Table.Summary.Cell index={0}>Summary</Table.Summary.Cell>
-          <Table.Summary.Cell index={1}>This is a summary content</Table.Summary.Cell>
-        </Table.Summary.Row>
+        <Table.Summary fixed>
+          <Table.Summary.Row>
+            <Table.Summary.Cell index={0}>Summary</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>This is a summary content</Table.Summary.Cell>
+          </Table.Summary.Row>
+        </Table.Summary>
       )}
     />
-  </>,
-  mountNode,
+  </>
 );
+
+export default App;
 ```
 
 <style>

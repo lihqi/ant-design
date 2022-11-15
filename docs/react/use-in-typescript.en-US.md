@@ -17,16 +17,12 @@ Create a new [cra-template-typescript](https://github.com/facebook/create-react-
 
 ```bash
 $ yarn create react-app antd-demo-ts --template typescript
-
-# or
-
-npx create-react-app my-app --template typescript
 ```
 
 If you are using npm (we will use yarn in the following instructions, it's ok to replace yarn with npm)
 
 ```bash
-$ npx create-react-app antd-demo-ts --typescript
+$ npx create-react-app antd-demo-ts --template typescript
 ```
 
 Then we go inside `antd-demo-ts` and start it.
@@ -66,7 +62,7 @@ Add `antd/dist/antd.css` at the top of `src/App.css`.
 @import '~antd/dist/antd.css';
 ```
 
-Ok, reboot with `yarn start`, you should now see a blue primary button displayed on the page. Next you can choose any components of `antd` to develop your application. Visit other workflows of `create-react-app` at it's [User Guide](https://create-react-app.dev/docs/getting-started#creating-a-typescript-app).
+OK, reboot with `yarn start`, you should now see a blue primary button displayed on the page. Next you can choose any components of `antd` to develop your application. Visit other workflows of `create-react-app` at it's [User Guide](https://create-react-app.dev/docs/getting-started#creating-a-typescript-app).
 
 `antd` is written in TypeScript with complete definitions, try out and enjoy the property suggestion and typing check.
 
