@@ -17,6 +17,9 @@ import warning from '../_util/warning';
 import useRemovePasswordTimeout from './hooks/useRemovePasswordTimeout';
 import { hasPrefixSuffix } from './utils';
 
+// CSSINJS
+import useStyle from './style';
+
 export interface InputFocusOptions extends FocusOptions {
   cursor?: 'start' | 'end' | 'all';
 }
@@ -36,7 +39,7 @@ export function resolveOnChange<E extends HTMLInputElement | HTMLTextAreaElement
     | React.ChangeEvent<E>
     | React.MouseEvent<HTMLElement, MouseEvent>
     | React.CompositionEvent<HTMLElement>,
-  onChange: undefined | ((event: React.ChangeEvent<E>) => void),
+  onChange?: (event: React.ChangeEvent<E>) => void,
   targetValue?: string,
 ) {
   if (!onChange) {
@@ -147,6 +150,9 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
   const prefixCls = getPrefixCls('input', customizePrefixCls);
   const inputRef = useRef<InputRef>(null);
 
+  // Style
+  const [wrapSSR, hashId] = useStyle(prefixCls);
+
   // ===================== Compact Item =====================
   const { compactSize, compactItemClassnames } = useCompactItemContext(prefixCls, direction);
 
@@ -209,13 +215,13 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
     mergedAllowClear = { clearIcon: <CloseCircleFilled /> };
   }
 
-  return (
+  return wrapSSR(
     <RcInput
       ref={composeRef(ref, inputRef)}
       prefixCls={prefixCls}
       autoComplete={input?.autoComplete}
       {...rest}
-      disabled={mergedDisabled || undefined}
+      disabled={mergedDisabled}
       onBlur={handleBlur}
       onFocus={handleFocus}
       suffix={suffixNode}
@@ -248,6 +254,7 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
           [`${prefixCls}-borderless`]: !bordered,
         },
         !inputHasPrefixSuffix && getStatusClassNames(prefixCls, mergedStatus),
+        hashId,
       )}
       affixWrapperClassName={classNames(
         {
@@ -257,10 +264,14 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
           [`${prefixCls}-affix-wrapper-borderless`]: !bordered,
         },
         getStatusClassNames(`${prefixCls}-affix-wrapper`, mergedStatus, hasFeedback),
+        hashId,
       )}
-      wrapperClassName={classNames({
-        [`${prefixCls}-group-rtl`]: direction === 'rtl',
-      })}
+      wrapperClassName={classNames(
+        {
+          [`${prefixCls}-group-rtl`]: direction === 'rtl',
+        },
+        hashId,
+      )}
       groupClassName={classNames(
         {
           [`${prefixCls}-group-wrapper-sm`]: mergedSize === 'small',
@@ -268,8 +279,9 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
           [`${prefixCls}-group-wrapper-rtl`]: direction === 'rtl',
         },
         getStatusClassNames(`${prefixCls}-group-wrapper`, mergedStatus, hasFeedback),
+        hashId,
       )}
-    />
+    />,
   );
 });
 

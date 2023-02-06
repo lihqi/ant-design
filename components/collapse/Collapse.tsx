@@ -7,11 +7,13 @@ import * as React from 'react';
 import toArray from 'rc-util/lib/Children/toArray';
 import omit from 'rc-util/lib/omit';
 import { ConfigContext } from '../config-provider';
-import collapseMotion from '../_util/motion';
+import initCollapseMotion from '../_util/motion';
 import { cloneElement } from '../_util/reactNode';
 import warning from '../_util/warning';
 import type { CollapsibleType } from './CollapsePanel';
 import CollapsePanel from './CollapsePanel';
+
+import useStyle from './style';
 
 /** @deprecated Please use `start` | `end` instead */
 type ExpandIconPositionLegacy = 'left' | 'right';
@@ -48,11 +50,7 @@ interface PanelProps {
   collapsible?: CollapsibleType;
 }
 
-interface CollapseInterface extends React.FC<CollapseProps> {
-  Panel: typeof CollapsePanel;
-}
-
-const Collapse: CollapseInterface = props => {
+const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>((props, ref) => {
   const { getPrefixCls, direction } = React.useContext(ConfigContext);
   const {
     prefixCls: customizePrefixCls,
@@ -62,6 +60,8 @@ const Collapse: CollapseInterface = props => {
     expandIconPosition = 'start',
   } = props;
   const prefixCls = getPrefixCls('collapse', customizePrefixCls);
+  const rootPrefixCls = getPrefixCls();
+  const [wrapSSR, hashId] = useStyle(prefixCls);
 
   // Warning if use legacy type `expandIconPosition`
   warning(
@@ -101,9 +101,10 @@ const Collapse: CollapseInterface = props => {
       [`${prefixCls}-ghost`]: !!ghost,
     },
     className,
+    hashId,
   );
   const openMotion: CSSMotionProps = {
-    ...collapseMotion,
+    ...initCollapseMotion(rootPrefixCls),
     motionAppear: false,
     leavedClassName: `${prefixCls}-content-hidden`,
   };
@@ -125,8 +126,9 @@ const Collapse: CollapseInterface = props => {
     });
   };
 
-  return (
+  return wrapSSR(
     <RcCollapse
+      ref={ref}
       openMotion={openMotion}
       {...props}
       expandIcon={renderExpandIcon}
@@ -134,10 +136,12 @@ const Collapse: CollapseInterface = props => {
       className={collapseClassName}
     >
       {getItems()}
-    </RcCollapse>
+    </RcCollapse>,
   );
-};
+});
 
-Collapse.Panel = CollapsePanel;
+if (process.env.NODE_ENV !== 'production') {
+  Collapse.displayName = 'Collapse';
+}
 
-export default Collapse;
+export default Object.assign(Collapse, { Panel: CollapsePanel });

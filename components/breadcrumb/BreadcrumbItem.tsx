@@ -1,6 +1,5 @@
 import DownOutlined from '@ant-design/icons/DownOutlined';
 import * as React from 'react';
-
 import warning from '../_util/warning';
 import { ConfigContext } from '../config-provider';
 import type { DropdownProps } from '../dropdown/dropdown';
@@ -20,10 +19,10 @@ export interface BreadcrumbItemProps {
   /** @deprecated Please use `menu` instead */
   overlay?: DropdownProps['overlay'];
 }
-interface BreadcrumbItemInterface extends React.FC<BreadcrumbItemProps> {
+type CompoundedComponent = React.FC<BreadcrumbItemProps> & {
   __ANT_BREADCRUMB_ITEM: boolean;
-}
-const BreadcrumbItem: BreadcrumbItemInterface = props => {
+};
+const BreadcrumbItem: CompoundedComponent = (props) => {
   const {
     prefixCls: customizePrefixCls,
     separator = '/',
@@ -49,8 +48,14 @@ const BreadcrumbItem: BreadcrumbItemInterface = props => {
   /** If overlay is have Wrap a Dropdown */
   const renderBreadcrumbNode = (breadcrumbItem: React.ReactNode) => {
     if (menu || overlay) {
+      const mergeDropDownProps: DropdownProps = {
+        ...dropdownProps,
+      };
+      if ('overlay' in props) {
+        mergeDropDownProps.overlay = overlay;
+      }
       return (
-        <Dropdown menu={menu} overlay={overlay} placement="bottom" {...dropdownProps}>
+        <Dropdown menu={menu} placement="bottom" {...mergeDropDownProps}>
           <span className={`${prefixCls}-overlay-link`}>
             {breadcrumbItem}
             <DownOutlined />

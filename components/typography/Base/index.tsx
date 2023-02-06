@@ -4,7 +4,7 @@ import EditOutlined from '@ant-design/icons/EditOutlined';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import ResizeObserver from 'rc-resize-observer';
-import type { AutoSizeType } from 'rc-textarea/lib/ResizableTextArea';
+import type { AutoSizeType } from 'rc-textarea';
 import toArray from 'rc-util/lib/Children/toArray';
 import useIsomorphicLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
@@ -12,7 +12,7 @@ import omit from 'rc-util/lib/omit';
 import { composeRef } from 'rc-util/lib/ref';
 import * as React from 'react';
 import { ConfigContext } from '../../config-provider';
-import { useLocaleReceiver } from '../../locale-provider/LocaleReceiver';
+import { useLocaleReceiver } from '../../locale/LocaleReceiver';
 import TransButton from '../../_util/transButton';
 import { isStyleSupport } from '../../_util/styleChecker';
 import type { TooltipProps } from '../../tooltip';
@@ -84,19 +84,21 @@ function wrapperDecorations(
 ) {
   let currentContent = content;
 
-  function wrap(needed: boolean | undefined, tag: string) {
-    if (!needed) return;
+  function wrap(tag: string, needed?: boolean) {
+    if (!needed) {
+      return;
+    }
 
     currentContent = React.createElement(tag, {}, currentContent);
   }
 
-  wrap(strong, 'strong');
-  wrap(underline, 'u');
-  wrap(del, 'del');
-  wrap(code, 'code');
-  wrap(mark, 'mark');
-  wrap(keyboard, 'kbd');
-  wrap(italic, 'i');
+  wrap('strong', strong);
+  wrap('u', underline);
+  wrap('del', del);
+  wrap('code', code);
+  wrap('mark', mark);
+  wrap('kbd', keyboard);
+  wrap('i', italic);
 
   return currentContent;
 }
@@ -277,7 +279,7 @@ const Base = React.forwardRef<HTMLElement, BlockProps>((props, ref) => {
   const cssLineClamp = mergedEnableEllipsis && rows > 1 && cssEllipsis;
 
   // >>>>> Expand
-  const onExpandClick: React.MouseEventHandler<HTMLElement> = e => {
+  const onExpandClick: React.MouseEventHandler<HTMLElement> = (e) => {
     setExpanded(true);
     ellipsisConfig.onExpand?.(e);
   };
@@ -510,6 +512,7 @@ const Base = React.forwardRef<HTMLElement, BlockProps>((props, ref) => {
               },
               className,
             )}
+            prefixCls={customizePrefixCls}
             style={{
               ...style,
               WebkitLineClamp: cssLineClamp ? rows : undefined,

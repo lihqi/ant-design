@@ -8,10 +8,9 @@ import { FormItemInputContext } from '../form/context';
 import { cloneElement } from '../_util/reactNode';
 import type { InputStatus } from '../_util/statusUtils';
 import { getMergedStatus, getStatusClassNames } from '../_util/statusUtils';
-import { tuple } from '../_util/type';
 import type { InputProps } from './Input';
 
-const ClearableInputType = tuple('text', 'input');
+const ClearableInputType = ['text', 'input'] as const;
 
 function hasAddon(props: InputProps | ClearableInputProps) {
   return !!(props.addonBefore || props.addonAfter);
@@ -44,6 +43,7 @@ export interface ClearableInputProps extends BasicProps {
   addonAfter?: React.ReactNode;
   triggerFocus?: () => void;
   status?: InputStatus;
+  hashId?: string;
 }
 
 class ClearableLabeledInput extends React.Component<ClearableInputProps> {
@@ -56,7 +56,7 @@ class ClearableLabeledInput extends React.Component<ClearableInputProps> {
         onClick={handleReset}
         // Do not trigger onBlur when clear input
         // https://github.com/ant-design/ant-design/issues/31200
-        onMouseDown={e => e.preventDefault()}
+        onMouseDown={(e) => e.preventDefault()}
         className={classNames(
           {
             [`${className}-hidden`]: !needClear,
@@ -83,6 +83,7 @@ class ClearableLabeledInput extends React.Component<ClearableInputProps> {
       bordered,
       hidden,
       status: customStatus,
+      hashId,
     } = this.props;
 
     const { status: contextStatus, hasFeedback } = statusContext;
@@ -106,6 +107,7 @@ class ClearableLabeledInput extends React.Component<ClearableInputProps> {
         // className will go to addon wrapper
         [`${className}`]: !hasAddon(this.props) && className,
       },
+      hashId,
     );
     return (
       <span className={affixWrapperCls} style={style} hidden={hidden}>
@@ -121,7 +123,7 @@ class ClearableLabeledInput extends React.Component<ClearableInputProps> {
   render() {
     return (
       <FormItemInputContext.Consumer>
-        {statusContext => {
+        {(statusContext) => {
           const { prefixCls, inputType, element } = this.props;
           if (inputType === ClearableInputType[0]) {
             return this.renderTextAreaWithClearIcon(prefixCls, element, statusContext);

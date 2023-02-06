@@ -9,6 +9,8 @@ import SizeContext from '../config-provider/SizeContext';
 import warning from '../_util/warning';
 import Wave from '../_util/wave';
 
+import useStyle from './style';
+
 export type SwitchSize = 'small' | 'default';
 export type SwitchChangeEventHandler = (
   checked: boolean,
@@ -35,11 +37,12 @@ export interface SwitchProps {
   id?: string;
 }
 
-interface CompoundedComponent
-  extends React.ForwardRefExoticComponent<SwitchProps & React.RefAttributes<HTMLElement>> {
+type CompoundedComponent = React.ForwardRefExoticComponent<
+  SwitchProps & React.RefAttributes<HTMLElement>
+> & {
   /** @internal */
   __ANT_SWITCH: boolean;
-}
+};
 
 const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
   (
@@ -73,6 +76,9 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
       </div>
     );
 
+    // Style
+    const [wrapSSR, hashId] = useStyle(prefixCls);
+
     const classes = classNames(
       {
         [`${prefixCls}-small`]: (customizeSize || size) === 'small',
@@ -80,10 +86,11 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         [`${prefixCls}-rtl`]: direction === 'rtl',
       },
       className,
+      hashId,
     );
 
-    return (
-      <Wave insertExtraNode>
+    return wrapSSR(
+      <Wave>
         <RcSwitch
           {...props}
           prefixCls={prefixCls}
@@ -92,7 +99,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           ref={ref}
           loadingIcon={loadingIcon}
         />
-      </Wave>
+      </Wave>,
     );
   },
 ) as CompoundedComponent;

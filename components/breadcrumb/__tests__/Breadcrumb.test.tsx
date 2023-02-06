@@ -46,6 +46,30 @@ describe('Breadcrumb', () => {
     );
   });
 
+  // https://github.com/ant-design/ant-design/issues/40204
+  it('wrong overlay deprecation warning in Dropdown', () => {
+    const items = [
+      {
+        key: '1',
+        label: (
+          <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+            General
+          </a>
+        ),
+      },
+    ];
+    render(
+      <Breadcrumb>
+        <Breadcrumb.Item menu={{ items }}>
+          <a href="">General</a>
+        </Breadcrumb.Item>
+      </Breadcrumb>,
+    );
+    expect(errorSpy).not.toHaveBeenCalledWith(
+      'Warning: [antd: Dropdown] `overlay` is deprecated. Please use `menu` instead.',
+    );
+  });
+
   // https://github.com/ant-design/ant-design/issues/5015
   it('should allow Breadcrumb.Item is null or undefined', () => {
     const { asFragment } = render(
@@ -180,5 +204,25 @@ describe('Breadcrumb', () => {
     expect(container.querySelectorAll('.ant-breadcrumb-link')[0].textContent).toBe('0');
     expect(container.querySelectorAll('.ant-breadcrumb-link')[1].textContent).toBe('0');
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('should console Error when `overlay` in props', () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    render(
+      <Breadcrumb>
+        <Breadcrumb.Item overlay={<div>test</div>} />
+      </Breadcrumb>,
+    );
+    expect(errSpy).toHaveBeenCalledWith(
+      'Warning: [antd: Breadcrumb.Item] `overlay` is deprecated. Please use `menu` instead.',
+    );
+    errSpy.mockRestore();
+  });
+
+  it('should not console Error when `overlay` not in props', () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    render(<Breadcrumb routes={[{ path: '/', breadcrumbName: 'Test' }]} />);
+    expect(errSpy).not.toHaveBeenCalled();
+    errSpy.mockRestore();
   });
 });

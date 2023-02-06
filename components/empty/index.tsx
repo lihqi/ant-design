@@ -1,9 +1,11 @@
 import classNames from 'classnames';
 import * as React from 'react';
 import { ConfigContext } from '../config-provider';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
+import LocaleReceiver from '../locale/LocaleReceiver';
 import DefaultEmptyImg from './empty';
 import SimpleEmptyImg from './simple';
+
+import useStyle from './style';
 
 const defaultEmptyImg = <DefaultEmptyImg />;
 const simpleEmptyImg = <SimpleEmptyImg />;
@@ -23,12 +25,12 @@ export interface EmptyProps {
   children?: React.ReactNode;
 }
 
-interface EmptyType extends React.FC<EmptyProps> {
+type CompoundedComponent = React.FC<EmptyProps> & {
   PRESENTED_IMAGE_DEFAULT: React.ReactNode;
   PRESENTED_IMAGE_SIMPLE: React.ReactNode;
-}
+};
 
-const Empty: EmptyType = ({
+const Empty: CompoundedComponent = ({
   className,
   prefixCls: customizePrefixCls,
   image = defaultEmptyImg,
@@ -39,11 +41,13 @@ const Empty: EmptyType = ({
 }) => {
   const { getPrefixCls, direction } = React.useContext(ConfigContext);
 
-  return (
+  const prefixCls = getPrefixCls('empty', customizePrefixCls);
+  const [wrapSSR, hashId] = useStyle(prefixCls);
+
+  return wrapSSR(
     <LocaleReceiver componentName="Empty">
-      {contextLocale => {
-        const prefixCls = getPrefixCls('empty', customizePrefixCls);
-        const des = typeof description !== 'undefined' ? description : contextLocale.description;
+      {(locale: TransferLocale) => {
+        const des = typeof description !== 'undefined' ? description : locale.description;
         const alt = typeof des === 'string' ? des : 'empty';
 
         let imageNode: React.ReactNode = null;
@@ -57,6 +61,7 @@ const Empty: EmptyType = ({
         return (
           <div
             className={classNames(
+              hashId,
               prefixCls,
               {
                 [`${prefixCls}-normal`]: image === simpleEmptyImg,
@@ -74,11 +79,15 @@ const Empty: EmptyType = ({
           </div>
         );
       }}
-    </LocaleReceiver>
+    </LocaleReceiver>,
   );
 };
 
 Empty.PRESENTED_IMAGE_DEFAULT = defaultEmptyImg;
 Empty.PRESENTED_IMAGE_SIMPLE = simpleEmptyImg;
+
+if (process.env.NODE_ENV !== 'production') {
+  Empty.displayName = 'Empty';
+}
 
 export default Empty;

@@ -6,13 +6,15 @@ import * as React from 'react';
 import { flushSync } from 'react-dom';
 import { ConfigContext } from '../config-provider';
 import DisabledContext from '../config-provider/DisabledContext';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
-import defaultLocale from '../locale/default';
+import LocaleReceiver from '../locale/LocaleReceiver';
+import defaultLocale from '../locale/en_US';
 import warning from '../_util/warning';
 import type { RcFile, ShowUploadListInterface, UploadChangeParam, UploadFile } from './interface';
 import { UploadProps } from './interface';
 import UploadList from './UploadList';
 import { file2Obj, getFileItem, removeFileItem, updateFileList } from './utils';
+
+import useStyle from './style';
 
 export const LIST_IGNORE = `__LIST_IGNORE_${Date.now()}__`;
 
@@ -55,7 +57,7 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
 
   const [mergedFileList, setMergedFileList] = useMergedState(defaultFileList || [], {
     value: fileList,
-    postState: list => list ?? [],
+    postState: (list) => list ?? [],
   });
 
   const [dragState, setDragState] = React.useState<string>('drop');
@@ -150,21 +152,23 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
     return parsedFile as RcFile;
   };
 
-  const onBatchStart: RcUploadProps['onBatchStart'] = batchFileInfoList => {
+  const onBatchStart: RcUploadProps['onBatchStart'] = (batchFileInfoList) => {
     // Skip file which marked as `LIST_IGNORE`, these file will not add to file list
-    const filteredFileInfoList = batchFileInfoList.filter(info => !(info.file as any)[LIST_IGNORE]);
+    const filteredFileInfoList = batchFileInfoList.filter(
+      (info) => !(info.file as any)[LIST_IGNORE],
+    );
 
     // Nothing to do since no file need upload
     if (!filteredFileInfoList.length) {
       return;
     }
 
-    const objectFileList = filteredFileInfoList.map(info => file2Obj(info.file as RcFile));
+    const objectFileList = filteredFileInfoList.map((info) => file2Obj(info.file as RcFile));
 
     // Concat new files with prev files
     let newFileList = [...mergedFileList];
 
-    objectFileList.forEach(fileObj => {
+    objectFileList.forEach((fileObj) => {
       // Replace file if exist
       newFileList = updateFileList(fileObj, newFileList);
     });
@@ -260,7 +264,7 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
 
   const handleRemove = (file: UploadFile) => {
     let currentFile: UploadFile;
-    Promise.resolve(typeof onRemove === 'function' ? onRemove(file) : onRemove).then(ret => {
+    Promise.resolve(typeof onRemove === 'function' ? onRemove(file) : onRemove).then((ret) => {
       // Prevent removing file
       if (ret === false) {
         return;
@@ -270,7 +274,7 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
 
       if (removedFileList) {
         currentFile = { ...file, status: 'removed' };
-        mergedFileList?.forEach(item => {
+        mergedFileList?.forEach((item) => {
           const matchKey = currentFile.uid !== undefined ? 'uid' : 'name';
           if (item[matchKey] === currentFile[matchKey] && !Object.isFrozen(item)) {
             item.status = 'removed';
@@ -333,10 +337,12 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
     delete rcUploadProps.id;
   }
 
+  const [wrapSSR, hashId] = useStyle(prefixCls);
+
   const renderUploadList = (button?: React.ReactNode, buttonVisible?: boolean) =>
     showUploadList ? (
       <LocaleReceiver componentName="Upload" defaultLocale={defaultLocale.Upload}>
-        {contextLocale => {
+        {(contextLocale) => {
           const {
             showRemoveIcon,
             showPreviewIcon,
@@ -376,20 +382,24 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
       button
     );
 
+  const rtlCls = {
+    [`${prefixCls}-rtl`]: direction === 'rtl',
+  };
+
   if (type === 'drag') {
     const dragCls = classNames(
       prefixCls,
       {
         [`${prefixCls}-drag`]: true,
-        [`${prefixCls}-drag-uploading`]: mergedFileList.some(file => file.status === 'uploading'),
+        [`${prefixCls}-drag-uploading`]: mergedFileList.some((file) => file.status === 'uploading'),
         [`${prefixCls}-drag-hover`]: dragState === 'dragover',
         [`${prefixCls}-disabled`]: mergedDisabled,
         [`${prefixCls}-rtl`]: direction === 'rtl',
       },
-      className,
+      hashId,
     );
-    return (
-      <span>
+    return wrapSSR(
+      <span className={classNames(`${prefixCls}-wrapper`, rtlCls, className, hashId)}>
         <div
           className={dragCls}
           onDrop={onFileDrop}
@@ -402,15 +412,12 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
           </RcUpload>
         </div>
         {renderUploadList()}
-      </span>
+      </span>,
     );
   }
 
-  const uploadButtonCls = classNames(prefixCls, {
-    [`${prefixCls}-select`]: true,
-    [`${prefixCls}-select-${listType}`]: true,
+  const uploadButtonCls = classNames(prefixCls, `${prefixCls}-select`, {
     [`${prefixCls}-disabled`]: mergedDisabled,
-    [`${prefixCls}-rtl`]: direction === 'rtl',
   });
 
   const renderUploadButton = (uploadButtonStyle?: React.CSSProperties) => (
@@ -422,18 +429,26 @@ const InternalUpload: React.ForwardRefRenderFunction<unknown, UploadProps> = (pr
   const uploadButton = renderUploadButton(children ? undefined : { display: 'none' });
 
   if (listType === 'picture-card') {
-    return (
-      <span className={classNames(`${prefixCls}-picture-card-wrapper`, className)}>
+    return wrapSSR(
+      <span
+        className={classNames(
+          `${prefixCls}-wrapper`,
+          `${prefixCls}-picture-card-wrapper`,
+          rtlCls,
+          className,
+          hashId,
+        )}
+      >
         {renderUploadList(uploadButton, !!children)}
-      </span>
+      </span>,
     );
   }
 
-  return (
-    <span className={className}>
+  return wrapSSR(
+    <span className={classNames(`${prefixCls}-wrapper`, rtlCls, className, hashId)}>
       {uploadButton}
       {renderUploadList()}
-    </span>
+    </span>,
   );
 };
 

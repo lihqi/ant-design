@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ConfigContext } from '../../config-provider';
-import LocaleReceiver from '../../locale-provider/LocaleReceiver';
-import defaultLocale from '../../locale/default';
+import LocaleReceiver from '../../locale/LocaleReceiver';
+import defaultLocale from '../../locale/en_US';
 import ConfirmDialog from '../ConfirmDialog';
 import type { ModalFuncProps } from '../Modal';
 
@@ -28,7 +28,7 @@ const HookModal: React.ForwardRefRenderFunction<HookModalRef, HookModalProps> = 
 
   const close = (...args: any[]) => {
     setOpen(false);
-    const triggerCancel = args.some(param => param && param.triggerCancel);
+    const triggerCancel = args.some((param) => param && param.triggerCancel);
     if (innerConfig.onCancel && triggerCancel) {
       innerConfig.onCancel(() => {}, ...args.slice(1));
     }
@@ -37,16 +37,18 @@ const HookModal: React.ForwardRefRenderFunction<HookModalRef, HookModalProps> = 
   React.useImperativeHandle(ref, () => ({
     destroy: close,
     update: (newConfig: ModalFuncProps) => {
-      setInnerConfig(originConfig => ({
+      setInnerConfig((originConfig) => ({
         ...originConfig,
         ...newConfig,
       }));
     },
   }));
 
+  const mergedOkCancel = innerConfig.okCancel ?? innerConfig.type === 'confirm';
+
   return (
     <LocaleReceiver componentName="Modal" defaultLocale={defaultLocale.Modal}>
-      {contextLocale => (
+      {(contextLocale) => (
         <ConfirmDialog
           prefixCls={prefixCls}
           rootPrefixCls={rootPrefixCls}
@@ -55,8 +57,7 @@ const HookModal: React.ForwardRefRenderFunction<HookModalRef, HookModalProps> = 
           open={open}
           afterClose={afterClose}
           okText={
-            innerConfig.okText ||
-            (innerConfig.okCancel ? contextLocale.okText : contextLocale.justOkText)
+            innerConfig.okText || (mergedOkCancel ? contextLocale.okText : contextLocale.justOkText)
           }
           direction={direction}
           cancelText={innerConfig.cancelText || contextLocale.cancelText}

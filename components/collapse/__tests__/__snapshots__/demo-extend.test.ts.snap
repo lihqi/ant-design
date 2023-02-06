@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders ./components/collapse/demo/accordion.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/accordion.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start"
   role="tablist"
@@ -128,7 +128,7 @@ exports[`renders ./components/collapse/demo/accordion.md extend context correctl
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/basic.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/basic.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start"
 >
@@ -269,7 +269,7 @@ exports[`renders ./components/collapse/demo/basic.md extend context correctly 1`
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/borderless.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/borderless.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start ant-collapse-borderless"
 >
@@ -410,7 +410,7 @@ exports[`renders ./components/collapse/demo/borderless.md extend context correct
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/collapsible.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/collapsible.tsx extend context correctly 1`] = `
 <div
   class="ant-space ant-space-vertical"
 >
@@ -587,12 +587,14 @@ exports[`renders ./components/collapse/demo/collapsible.md extend context correc
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/custom.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/custom.tsx extend context correctly 1`] = `
 <div
-  class="ant-collapse ant-collapse-icon-position-start ant-collapse-borderless site-collapse-custom-collapse"
+  class="ant-collapse ant-collapse-icon-position-start ant-collapse-borderless"
+  style="background:#ffffff"
 >
   <div
-    class="ant-collapse-item ant-collapse-item-active site-collapse-custom-panel"
+    class="ant-collapse-item ant-collapse-item-active"
+    style="margin-bottom:24px;background:rgba(0, 0, 0, 0.02);border-radius:8px;border:none"
   >
     <div
       aria-disabled="false"
@@ -646,7 +648,8 @@ exports[`renders ./components/collapse/demo/custom.md extend context correctly 1
     </div>
   </div>
   <div
-    class="ant-collapse-item site-collapse-custom-panel"
+    class="ant-collapse-item"
+    style="margin-bottom:24px;background:rgba(0, 0, 0, 0.02);border-radius:8px;border:none"
   >
     <div
       aria-disabled="false"
@@ -686,7 +689,8 @@ exports[`renders ./components/collapse/demo/custom.md extend context correctly 1
     </div>
   </div>
   <div
-    class="ant-collapse-item site-collapse-custom-panel"
+    class="ant-collapse-item"
+    style="margin-bottom:24px;background:rgba(0, 0, 0, 0.02);border-radius:8px;border:none"
   >
     <div
       aria-disabled="false"
@@ -728,7 +732,7 @@ exports[`renders ./components/collapse/demo/custom.md extend context correctly 1
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/extra.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/extra.tsx extend context correctly 1`] = `
 Array [
   <div
     class="ant-collapse ant-collapse-icon-position-start"
@@ -1089,7 +1093,7 @@ Array [
 ]
 `;
 
-exports[`renders ./components/collapse/demo/ghost.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/ghost.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start ant-collapse-ghost"
 >
@@ -1230,7 +1234,7 @@ exports[`renders ./components/collapse/demo/ghost.md extend context correctly 1`
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/mix.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/mix.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start"
 >
@@ -1357,7 +1361,7 @@ exports[`renders ./components/collapse/demo/mix.md extend context correctly 1`] 
 </div>
 `;
 
-exports[`renders ./components/collapse/demo/noarrow.md extend context correctly 1`] = `
+exports[`renders ./components/collapse/demo/noarrow.tsx extend context correctly 1`] = `
 <div
   class="ant-collapse ant-collapse-icon-position-start"
 >

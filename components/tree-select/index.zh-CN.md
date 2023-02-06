@@ -1,9 +1,11 @@
 ---
 category: Components
 subtitle: 树选择
-type: 数据录入
+group: 数据录入
 title: TreeSelect
-cover: https://gw.alipayobjects.com/zos/alicdn/Ax4DA0njr/TreeSelect.svg
+cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DfTMRYSDngEAAAAAAAAAAAAADrJ8AQ/original
+demo:
+  cols: 2
 ---
 
 树型选择控件。
@@ -11,6 +13,20 @@ cover: https://gw.alipayobjects.com/zos/alicdn/Ax4DA0njr/TreeSelect.svg
 ## 何时使用
 
 类似 Select 的选择控件，可选择的数据结构是一个树形结构时，可以使用 TreeSelect，例如公司层级、学科系统、分类目录等等。
+
+## 代码演示
+
+<!-- prettier-ignore -->
+<code src="./demo/basic.tsx">基本</code>
+<code src="./demo/multiple.tsx">多选</code>
+<code src="./demo/treeData.tsx">从数据直接生成</code>
+<code src="./demo/checkable.tsx">可勾选</code>
+<code src="./demo/async.tsx">异步加载</code>
+<code src="./demo/treeLine.tsx">线性样式</code>
+<code src="./demo/placement.tsx">弹出位置</code>
+<code src="./demo/status.tsx">自定义状态</code>
+<code src="./demo/suffix.tsx" debug>后缀图标</code>
+<code src="./demo/render-panel.tsx" debug>\_InternalPanelDoNotUseOrYouWillBeFired</code>
 
 ## API
 
@@ -57,7 +73,7 @@ cover: https://gw.alipayobjects.com/zos/alicdn/Ax4DA0njr/TreeSelect.svg
 | treeExpandAction | 点击节点 title 时的展开逻辑，可选：false \| `click` \| `doubleClick` | string \| boolean | false | 4.21.0 |
 | treeExpandedKeys | 设置展开的树节点 | string\[] | - |  |
 | treeIcon | 是否展示 TreeNode title 前的图标，没有默认样式，如设置为 true，需要自行定义图标相关样式 | boolean | false |  |
-| treeLine | 是否展示线条样式，请参考 [Tree - showLine](/components/tree/#components-tree-demo-line) | boolean \| object | false | 4.17.0 |
+| treeLine | 是否展示线条样式，请参考 [Tree - showLine](/components/tree-cn#components-tree-demo-line) | boolean \| object | false | 4.17.0 |
 | treeLoadedKeys | （受控）已经加载的节点，需要配合 `loadData` 使用 | string[] | [] |  |
 | treeNodeFilterProp | 输入项过滤对应的 treeNode 属性 | string | `value` |  |
 | treeNodeLabelProp | 作为显示的 prop 设置 | string | `title` |  |
@@ -99,4 +115,4 @@ cover: https://gw.alipayobjects.com/zos/alicdn/Ax4DA0njr/TreeSelect.svg
 
 ### 自定义 Option 样式导致滚动异常怎么办？
 
-请参考 Select 的 [FAQ](/components/select)。
+请参考 Select 的 [FAQ](/components/select-cn)。

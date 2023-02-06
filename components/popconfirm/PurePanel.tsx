@@ -1,12 +1,17 @@
 import * as React from 'react';
+import ExclamationCircleFilled from '@ant-design/icons/ExclamationCircleFilled';
+import classNames from 'classnames';
 import type { PopconfirmProps } from '.';
 import Button from '../button';
 import { convertLegacyProps } from '../button/button';
 import ActionButton from '../_util/ActionButton';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
-import defaultLocale from '../locale/default';
+import LocaleReceiver from '../locale/LocaleReceiver';
+import defaultLocale from '../locale/en_US';
 import { getRenderPropValue } from '../_util/getRenderPropValue';
 import { ConfigContext } from '../config-provider';
+import PopoverPurePanel from '../popover/PurePanel';
+
+import useStyle from './style';
 
 export interface PopconfirmLocale {
   okText: string;
@@ -24,23 +29,25 @@ export interface OverlayProps
     | 'okType'
     | 'showCancel'
     | 'title'
+    | 'description'
   > {
   prefixCls: string;
   close?: Function;
-  onConfirm?: React.MouseEventHandler<HTMLButtonElement>;
-  onCancel?: React.MouseEventHandler<HTMLButtonElement>;
+  onConfirm?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  onCancel?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
 }
 
-export const Overlay: React.FC<OverlayProps> = props => {
+export const Overlay: React.FC<OverlayProps> = (props) => {
   const {
     prefixCls,
     okButtonProps,
     cancelButtonProps,
     title,
+    description,
     cancelText,
     okText,
-    okType,
-    icon,
+    okType = 'primary',
+    icon = <ExclamationCircleFilled />,
     showCancel = true,
     close,
     onConfirm,
@@ -51,12 +58,21 @@ export const Overlay: React.FC<OverlayProps> = props => {
 
   return (
     <LocaleReceiver componentName="Popconfirm" defaultLocale={defaultLocale.Popconfirm}>
-      {contextLocale => (
+      {(contextLocale) => (
         <div className={`${prefixCls}-inner-content`}>
           <div className={`${prefixCls}-message`}>
             {icon && <span className={`${prefixCls}-message-icon`}>{icon}</span>}
-            <div className={`${prefixCls}-message-title`}>{getRenderPropValue(title)}</div>
+            <div
+              className={classNames(`${prefixCls}-message-title`, {
+                [`${prefixCls}-message-title-only`]: !!description,
+              })}
+            >
+              {getRenderPropValue(title)}
+            </div>
           </div>
+          {description && (
+            <div className={`${prefixCls}-description`}>{getRenderPropValue(description)}</div>
+          )}
           <div className={`${prefixCls}-buttons`}>
             {showCancel && (
               <Button onClick={onCancel} size="small" {...cancelButtonProps}>
@@ -79,3 +95,28 @@ export const Overlay: React.FC<OverlayProps> = props => {
     </LocaleReceiver>
   );
 };
+
+export interface PurePanelProps
+  extends Omit<OverlayProps, 'prefixCls'>,
+    Pick<PopconfirmProps, 'placement'> {
+  className?: string;
+  style?: React.CSSProperties;
+  prefixCls?: string;
+}
+
+export default function PurePanel(props: PurePanelProps) {
+  const { prefixCls: customizePrefixCls, placement, className, style, ...restProps } = props;
+
+  const { getPrefixCls } = React.useContext(ConfigContext);
+  const prefixCls = getPrefixCls('popconfirm', customizePrefixCls);
+  const [wrapSSR] = useStyle(prefixCls);
+
+  return wrapSSR(
+    <PopoverPurePanel
+      placement={placement}
+      className={classNames(prefixCls, className)}
+      style={style}
+      content={<Overlay prefixCls={prefixCls} {...restProps} />}
+    />,
+  );
+}

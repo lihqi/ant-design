@@ -1,37 +1,37 @@
+import { createTheme } from '@ant-design/cssinjs';
 import IconContext from '@ant-design/icons/lib/components/Context';
 import { FormProvider as RcFormProvider } from 'rc-field-form';
 import type { ValidateMessages } from 'rc-field-form/lib/interface';
 import useMemo from 'rc-util/lib/hooks/useMemo';
 import * as React from 'react';
+import type { ReactElement } from 'react';
 import type { RequiredMark } from '../form/Form';
-import type { Locale } from '../locale-provider';
-import LocaleProvider, { ANT_MARK } from '../locale-provider';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
-import defaultLocale from '../locale/default';
-import message from '../message';
-import notification from '../notification';
-import type { Theme } from './context';
-import {
-  ConfigConsumer,
-  ConfigConsumerProps,
-  ConfigContext,
-  CSPConfig,
-  DirectionType,
-} from './context';
+import type { Locale } from '../locale';
+import LocaleProvider, { ANT_MARK } from '../locale';
+import LocaleReceiver from '../locale/LocaleReceiver';
+import defaultLocale from '../locale/en_US';
+import { DesignTokenContext } from '../theme/internal';
+import defaultSeedToken from '../theme/themes/seed';
+import type { ConfigConsumerProps, CSPConfig, DirectionType, Theme, ThemeConfig } from './context';
+import { ConfigConsumer, ConfigContext, defaultIconPrefixCls } from './context';
 import { registerTheme } from './cssVariables';
-import { RenderEmptyHandler } from './defaultRenderEmpty';
+import type { RenderEmptyHandler } from './defaultRenderEmpty';
 import { DisabledContextProvider } from './DisabledContext';
+import useTheme from './hooks/useTheme';
 import type { SizeType } from './SizeContext';
 import SizeContext, { SizeContextProvider } from './SizeContext';
+import useStyle from './style';
 
 export {
-  RenderEmptyHandler,
+  type RenderEmptyHandler,
   ConfigContext,
   ConfigConsumer,
-  CSPConfig,
-  DirectionType,
-  ConfigConsumerProps,
+  type CSPConfig,
+  type DirectionType,
+  type ConfigConsumerProps,
+  type ThemeConfig,
 };
+export { defaultIconPrefixCls };
 
 export const configConsumerProps = [
   'getTargetContainer',
@@ -54,6 +54,7 @@ const PASSED_PROPS: Exclude<keyof ConfigConsumerProps, 'rootPrefixCls' | 'getPre
   'input',
   'pagination',
   'form',
+  'select',
 ];
 
 export interface ConfigProviderProps {
@@ -73,6 +74,9 @@ export interface ConfigProviderProps {
   input?: {
     autoComplete?: string;
   };
+  select?: {
+    showSearch?: boolean;
+  };
   pagination?: {
     showSizeChanger?: boolean;
   };
@@ -88,6 +92,7 @@ export interface ConfigProviderProps {
   };
   virtual?: boolean;
   dropdownMatchSelectWidth?: boolean;
+  theme?: ThemeConfig;
 }
 
 interface ProviderChildrenProps extends ConfigProviderProps {
@@ -96,7 +101,6 @@ interface ProviderChildrenProps extends ConfigProviderProps {
 }
 
 export const defaultPrefixCls = 'ant';
-export const defaultIconPrefixCls = 'anticon';
 let globalPrefixCls: string;
 let globalIconPrefixCls: string;
 
@@ -131,20 +135,10 @@ export const globalConfig = () => ({
     return suffixCls ? `${getGlobalPrefixCls()}-${suffixCls}` : getGlobalPrefixCls();
   },
   getIconPrefixCls: getGlobalIconPrefixCls,
-  getRootPrefixCls: (rootPrefixCls?: string, customizePrefixCls?: string) => {
-    // Customize rootPrefixCls is first priority
-    if (rootPrefixCls) {
-      return rootPrefixCls;
-    }
-
+  getRootPrefixCls: () => {
     // If Global prefixCls provided, use this
     if (globalPrefixCls) {
       return globalPrefixCls;
-    }
-
-    // [Legacy] If customize prefixCls provided, we cut it to get the prefixCls
-    if (customizePrefixCls && customizePrefixCls.includes('-')) {
-      return customizePrefixCls.replace(/^(.*)-[^-]*$/, '$1');
     }
 
     // Fallback to default prefixCls
@@ -152,10 +146,10 @@ export const globalConfig = () => ({
   },
 });
 
-const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
+const ProviderChildren: React.FC<ProviderChildrenProps> = (props) => {
   const {
     children,
-    csp,
+    csp: customCsp,
     autoInsertSpaceInButton,
     form,
     locale,
@@ -166,7 +160,8 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     dropdownMatchSelectWidth,
     legacyLocale,
     parentContext,
-    iconPrefixCls,
+    iconPrefixCls: customIconPrefixCls,
+    theme,
     componentDisabled,
   } = props;
 
@@ -183,8 +178,15 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     [parentContext.getPrefixCls, props.prefixCls],
   );
 
-  const config = {
-    ...parentContext,
+  const iconPrefixCls = customIconPrefixCls || parentContext.iconPrefixCls || defaultIconPrefixCls;
+  const shouldWrapSSR = iconPrefixCls !== parentContext.iconPrefixCls;
+  const csp = customCsp || parentContext.csp;
+
+  const wrapSSR = useStyle(iconPrefixCls);
+
+  const mergedTheme = useTheme(theme, parentContext.theme);
+
+  const baseConfig = {
     csp,
     autoInsertSpaceInButton,
     locale: locale || legacyLocale,
@@ -193,11 +195,23 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     virtual,
     dropdownMatchSelectWidth,
     getPrefixCls,
+    iconPrefixCls,
+    theme: mergedTheme,
   };
+
+  const config = {
+    ...parentContext,
+  };
+
+  Object.keys(baseConfig).forEach((key: keyof typeof baseConfig) => {
+    if (baseConfig[key] !== undefined) {
+      (config as any)[key] = baseConfig[key];
+    }
+  });
 
   // Pass the props used by `useContext` directly with child component.
   // These props should merged into `config`.
-  PASSED_PROPS.forEach(propName => {
+  PASSED_PROPS.forEach((propName) => {
     const propValue = props[propName];
     if (propValue) {
       (config as any)[propName] = propValue;
@@ -213,7 +227,7 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
       const currentKeys = Object.keys(currentConfig) as Array<keyof typeof config>;
       return (
         prevKeys.length !== currentKeys.length ||
-        prevKeys.some(key => prevConfig[key] !== currentConfig[key])
+        prevKeys.some((key) => prevConfig[key] !== currentConfig[key])
       );
     },
   );
@@ -223,7 +237,7 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     [iconPrefixCls, csp],
   );
 
-  let childNode = children;
+  let childNode = shouldWrapSSR ? wrapSSR(children as ReactElement) : children;
   // Additional Form provider
   let validateMessages: ValidateMessages = {};
 
@@ -257,6 +271,32 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     childNode = <SizeContextProvider size={componentSize}>{childNode}</SizeContextProvider>;
   }
 
+  // ================================ Dynamic theme ================================
+  const memoTheme = React.useMemo(() => {
+    const { algorithm, token, ...rest } = mergedTheme || {};
+    const themeObj =
+      algorithm && (!Array.isArray(algorithm) || algorithm.length > 0)
+        ? createTheme(algorithm)
+        : undefined;
+
+    return {
+      ...rest,
+      theme: themeObj,
+
+      token: {
+        ...defaultSeedToken,
+        ...token,
+      },
+    };
+  }, [mergedTheme]);
+
+  if (theme) {
+    childNode = (
+      <DesignTokenContext.Provider value={memoTheme}>{childNode}</DesignTokenContext.Provider>
+    );
+  }
+
+  // =================================== Render ===================================
   if (componentDisabled !== undefined) {
     childNode = (
       <DisabledContextProvider disabled={componentDisabled}>{childNode}</DisabledContextProvider>
@@ -267,37 +307,28 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
 };
 
 const ConfigProvider: React.FC<ConfigProviderProps> & {
+  /** @private internal Usage. do not use in your production */
   ConfigContext: typeof ConfigContext;
   SizeContext: typeof SizeContext;
   config: typeof setGlobalConfig;
-} = props => {
-  React.useEffect(() => {
-    if (props.direction) {
-      message.config({
-        rtl: props.direction === 'rtl',
-      });
-      notification.config({
-        rtl: props.direction === 'rtl',
-      });
-    }
-  }, [props.direction]);
+} = (props) => (
+  <LocaleReceiver>
+    {(_, __, legacyLocale) => (
+      <ConfigConsumer>
+        {(context) => (
+          <ProviderChildren parentContext={context} legacyLocale={legacyLocale} {...props} />
+        )}
+      </ConfigConsumer>
+    )}
+  </LocaleReceiver>
+);
 
-  return (
-    <LocaleReceiver>
-      {(_, __, legacyLocale) => (
-        <ConfigConsumer>
-          {context => (
-            <ProviderChildren parentContext={context} legacyLocale={legacyLocale} {...props} />
-          )}
-        </ConfigConsumer>
-      )}
-    </LocaleReceiver>
-  );
-};
-
-/** @private internal Usage. do not use in your production */
 ConfigProvider.ConfigContext = ConfigContext;
 ConfigProvider.SizeContext = SizeContext;
 ConfigProvider.config = setGlobalConfig;
+
+if (process.env.NODE_ENV !== 'production') {
+  ConfigProvider.displayName = 'ConfigProvider';
+}
 
 export default ConfigProvider;

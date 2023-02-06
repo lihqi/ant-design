@@ -67,28 +67,6 @@ jobs:
         run: npm run lint
     needs: setup
 
-  tsx-demo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: restore cache from package-lock.json
-        uses: actions/cache@v3
-        with:
-          path: package-temp-dir
-          key: lock-${{ github.sha }}
-
-      - name: restore cache from node_modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-temp-dir/package-lock.json') }}
-
-      - name: tsx-demo
-        run: npm run check-ts-demo
-    needs: setup
-
   check_metadata:
     runs-on: ubuntu-latest
     steps:
@@ -143,92 +121,6 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
     needs: setup
 
-  ############################### Style ################################
-  style-compile:
-    name: es style compile
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: restore cache from package-lock.json
-        uses: actions/cache@v3
-        with:
-          path: package-temp-dir
-          key: lock-${{ github.sha }}
-
-      - name: restore cache from node_modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-temp-dir/package-lock.json') }}
-
-      - name: restore cache from lib
-        uses: actions/cache@v3
-        with:
-          path: lib
-          key: lib-${{ github.sha }}
-
-      - name: restore cache from es
-        uses: actions/cache@v3
-        with:
-          path: es
-          key: es-${{ github.sha }}
-
-      - name: lessc component
-        run: npx lessc --js ./es/button/style/index.less
-
-      - name: lessc mixins
-        run: npx lessc --js ./es/style/mixins/index.less
-    needs: compile
-
-  style-dist:
-    name: dist style compile
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: restore cache from package-lock.json
-        uses: actions/cache@v3
-        with:
-          path: package-temp-dir
-          key: lock-${{ github.sha }}
-
-      - name: restore cache from node_modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-temp-dir/package-lock.json') }}
-
-      - name: restore cache from lib
-        uses: actions/cache@v3
-        with:
-          path: lib
-          key: lib-${{ github.sha }}
-
-      - name: restore cache from es
-        uses: actions/cache@v3
-        with:
-          path: es
-          key: es-${{ github.sha }}
-
-      - name: restore cache from dist
-        uses: actions/cache@v3
-        with:
-          path: dist
-          key: dist-${{ github.sha }}
-
-      - name: lessc default
-        run: npx lessc --js ./dist/antd.less
-
-      - name: lessc dark
-        run: npx lessc --js ./dist/antd.dark.less
-
-      - name: lessc variable
-        run: npx lessc --js ./dist/antd.variable.less
-    needs: [compile, dist]
-
   ################################ Test ################################
   normal-test:
     name: test
@@ -278,13 +170,6 @@ jobs:
       - name: check
         if: ${{ matrix.module == 'dist' }}
         run: node ./tests/dekko/dist.test.js
-
-      # 17 only
-      - name: bundlesize
-        if: ${{ matrix.module == 'dist' && matrix.react == '17' }}
-        run: npm run bundlesize
-        env:
-          BUNDLESIZE_GITHUB_TOKEN: ${{ secrets.BUNDLESIZE_GITHUB_TOKEN }}
 
       # dom test
       - name: dom test

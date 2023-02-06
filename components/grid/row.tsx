@@ -2,13 +2,20 @@ import classNames from 'classnames';
 import * as React from 'react';
 import { ConfigContext } from '../config-provider';
 import useFlexGapSupport from '../_util/hooks/useFlexGapSupport';
-import type { Breakpoint, ScreenMap } from '../_util/responsiveObserve';
-import ResponsiveObserve, { responsiveArray } from '../_util/responsiveObserve';
-import { tuple } from '../_util/type';
+import type { Breakpoint, ScreenMap } from '../_util/responsiveObserver';
+import useResponsiveObserver, { responsiveArray } from '../_util/responsiveObserver';
 import RowContext from './RowContext';
+import { useRowStyle } from './style';
 
-const RowAligns = tuple('top', 'middle', 'bottom', 'stretch');
-const RowJustify = tuple('start', 'end', 'center', 'space-around', 'space-between', 'space-evenly');
+const RowAligns = ['top', 'middle', 'bottom', 'stretch'] as const;
+const RowJustify = [
+  'start',
+  'end',
+  'center',
+  'space-around',
+  'space-between',
+  'space-evenly',
+] as const;
 
 type Responsive = 'xxl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs';
 type ResponsiveLike<T> = {
@@ -32,6 +39,9 @@ function useMergePropByScreen(oriProp: RowProps['align'] | RowProps['justify'], 
   const [prop, setProp] = React.useState(typeof oriProp === 'string' ? oriProp : '');
 
   const clacMergeAlignOrJustify = () => {
+    if (typeof oriProp === 'string') {
+      setProp(oriProp);
+    }
     if (typeof oriProp !== 'object') {
       return;
     }
@@ -96,9 +106,11 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
 
   const gutterRef = React.useRef<Gutter | [Gutter, Gutter]>(gutter);
 
+  const responsiveObserver = useResponsiveObserver();
+
   // ================================== Effect ==================================
   React.useEffect(() => {
-    const token = ResponsiveObserve.subscribe(screen => {
+    const token = responsiveObserver.subscribe((screen) => {
       setCurScreens(screen);
       const currentGutter = gutterRef.current || 0;
       if (
@@ -109,7 +121,7 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
         setScreens(screen);
       }
     });
-    return () => ResponsiveObserve.unsubscribe(token);
+    return () => responsiveObserver.unsubscribe(token);
   }, []);
 
   // ================================== Render ==================================
@@ -133,6 +145,7 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
   };
 
   const prefixCls = getPrefixCls('row', customizePrefixCls);
+  const [wrapSSR, hashId] = useRowStyle(prefixCls);
   const gutters = getGutter();
   const classes = classNames(
     prefixCls,
@@ -143,6 +156,7 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
     className,
+    hashId,
   );
 
   // Add gutter related style
@@ -171,12 +185,12 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
     [gutterH, gutterV, wrap, supportFlexGap],
   );
 
-  return (
+  return wrapSSR(
     <RowContext.Provider value={rowContext}>
       <div {...others} className={classes} style={{ ...rowStyle, ...style }} ref={ref}>
         {children}
       </div>
-    </RowContext.Provider>
+    </RowContext.Provider>,
   );
 });
 

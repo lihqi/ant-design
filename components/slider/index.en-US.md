@@ -1,8 +1,10 @@
 ---
 category: Components
-type: Data Entry
+group: Data Entry
 title: Slider
-cover: https://gw.alipayobjects.com/zos/alicdn/HZ3meFc6W/Silder.svg
+cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_4heQaUrFn4AAAAAAAAAAAAADrJ8AQ/original
+demo:
+  cols: 2
 ---
 
 A Slider component for displaying current value and intervals in range.
@@ -11,13 +13,27 @@ A Slider component for displaying current value and intervals in range.
 
 To input a value in a range.
 
+## Examples
+
+<!-- prettier-ignore -->
+<code src="./demo/basic.tsx">Basic</code>
+<code src="./demo/input-number.tsx">Slider with InputNumber</code>
+<code src="./demo/icon-slider.tsx">Slider with icon</code>
+<code src="./demo/tip-formatter.tsx">Customize tooltip</code>
+<code src="./demo/event.tsx">Event</code>
+<code src="./demo/mark.tsx">Graduated slider</code>
+<code src="./demo/vertical.tsx">Vertical</code>
+<code src="./demo/show-tooltip.tsx">Control visible of ToolTip</code>
+<code src="./demo/reverse.tsx">Reverse</code>
+<code src="./demo/dragableTrack.tsx">Draggable track</code>
+
 ## API
 
 | Property | Description | Type | Default | Version |
 | --- | --- | --- | --- | --- |
 | autoFocus | Whether get focus when component mounted | boolean | false |  |
 | defaultValue | The default value of slider. When `range` is false, use number, otherwise, use \[number, number] | number \| \[number, number] | 0 \| \[0, 0] |  |
-| disabled | If true, the slider will not be interactable | boolean | false |  |
+| disabled | If true, the slider will not be intractable | boolean | false |  |
 | dots | Whether the thumb can drag over tick only | boolean | false |  |
 | included | Make effect when `marks` not null, true means containment and false means coordinative | boolean | true |  |
 | marks | Tick mark of Slider, type of key must be `number`, and must in closed interval \[min, max], each mark can declare its own style | object | { number: ReactNode } \| { number: { style: CSSProperties, label: ReactNode } } |  |
@@ -42,7 +58,7 @@ To input a value in a range.
 
 ### tooltip
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
+| Property | Description | Type | Default | Version |
 | --- | --- | --- | --- | --- |
 | open | If true, Tooltip will show always, or it will not show anyway, even if dragging or hovering | boolean | - | 4.23.0 |
 | placement | Set Tooltip display position. Ref [Tooltip](/components/tooltip/) | string | - | 4.23.0 |
