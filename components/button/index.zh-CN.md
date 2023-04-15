@@ -3,6 +3,7 @@ category: Components
 title: Button
 subtitle: 按钮
 cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BrFMQ5s7AAQAAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Lp1kTYmSsgoAAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 group:
@@ -73,6 +74,10 @@ group:
 | onClick | 点击按钮时的回调 | (event: MouseEvent) => void | - |  |
 
 支持原生 button 的其他所有属性。
+
+## Design Token
+
+<ComponentTokenTable component="Button"></ComponentTokenTable>
 
 ## FAQ
 

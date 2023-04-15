@@ -1,6 +1,6 @@
 import { render } from 'rc-util/lib/React/render';
 import * as React from 'react';
-import ConfigProvider, { globalConfig } from '../config-provider';
+import ConfigProvider, { globalConfig, warnContext } from '../config-provider';
 import type { ArgsProps, GlobalConfigProps, NotificationInstance } from './interface';
 import PurePanel from './PurePanel';
 import useNotification, { useInternalNotification } from './useNotification';
@@ -98,9 +98,9 @@ const GlobalHolder = React.forwardRef<GlobalHolderRef, {}>((_, ref) => {
   React.useEffect(sync, []);
 
   React.useImperativeHandle(ref, () => {
-    const instance: any = { ...api };
+    const instance: NotificationInstance = { ...api };
 
-    Object.keys(instance).forEach((method) => {
+    Object.keys(instance).forEach((method: keyof NotificationInstance) => {
       instance[method] = (...args: any[]) => {
         sync();
         return (api as any)[method](...args);
@@ -187,8 +187,6 @@ function flushNotice() {
 // ==============================================================================
 // ==                                  Export                                  ==
 // ==============================================================================
-const methods = ['success', 'info', 'warning', 'error'] as const;
-type MethodType = typeof methods[number];
 
 function setNotificationGlobalConfig(config: GlobalConfigProps) {
   defaultGlobalConfig = {
@@ -203,6 +201,11 @@ function setNotificationGlobalConfig(config: GlobalConfigProps) {
 }
 
 function open(config: ArgsProps) {
+  // Warning if exist theme
+  if (process.env.NODE_ENV !== 'production') {
+    warnContext('notification');
+  }
+
   taskQueue.push({
     type: 'open',
     config,
@@ -218,14 +221,27 @@ function destroy(key: React.Key) {
   flushNotice();
 }
 
-const baseStaticMethods: {
+interface BaseMethods {
   open: (config: ArgsProps) => void;
   destroy: (key?: React.Key) => void;
   config: any;
   useNotification: typeof useNotification;
   /** @private Internal Component. Do not use in your production. */
   _InternalPanelDoNotUseOrYouWillBeFired: typeof PurePanel;
-} = {
+}
+
+type StaticFn = (config: ArgsProps) => void;
+
+interface NoticeMethods {
+  success: StaticFn;
+  info: StaticFn;
+  warning: StaticFn;
+  error: StaticFn;
+}
+
+const methods: (keyof NoticeMethods)[] = ['success', 'info', 'warning', 'error'];
+
+const baseStaticMethods: BaseMethods = {
   open,
   destroy,
   config: setNotificationGlobalConfig,
@@ -233,15 +249,10 @@ const baseStaticMethods: {
   _InternalPanelDoNotUseOrYouWillBeFired: PurePanel,
 };
 
-const staticMethods: typeof baseStaticMethods & Record<MethodType, (config: ArgsProps) => void> =
-  baseStaticMethods as any;
+const staticMethods = baseStaticMethods as NoticeMethods & BaseMethods;
 
-methods.forEach((type) => {
-  staticMethods[type] = (config) =>
-    open({
-      ...config,
-      type,
-    });
+methods.forEach((type: keyof NoticeMethods) => {
+  staticMethods[type] = (config) => open({ ...config, type });
 });
 
 // ==============================================================================

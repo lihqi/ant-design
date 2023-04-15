@@ -4,6 +4,7 @@ category: Components
 subtitle: 对话框
 title: Modal
 cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*wM3qQ5XrhlcAAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fBrgSJBmavgAAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 ---
@@ -70,6 +71,7 @@ demo:
 | zIndex | 设置 Modal 的 `z-index` | number | 1000 |  |
 | onCancel | 点击遮罩层或右上角叉或取消按钮的回调 | function(e) | - |  |
 | onOk | 点击确定回调 | function(e) | - |  |
+| afterOpenChange | 打开和关闭 Modal 时动画结束后的回调 | (open: boolean) => void | - | 5.4.0 |
 
 #### 注意
 
@@ -103,7 +105,7 @@ demo:
 | content | 内容 | ReactNode | - |  |
 | footer | 底部内容，当不需要默认底部按钮时，可以设为 `footer: null` | ReactNode | - | 5.1.0 |
 | getContainer | 指定 Modal 挂载的 HTML 节点, false 为挂载在当前 dom | HTMLElement \| () => HTMLElement \| Selectors \| false | document.body |  |
-| icon | 自定义图标 | ReactNode | &lt;QuestionCircle /> |  |
+| icon | 自定义图标 | ReactNode | &lt;ExclamationCircleFilled /> |  |
 | keyboard | 是否支持键盘 esc 关闭 | boolean | true |  |
 | mask | 是否展示遮罩 | boolean | true |  |
 | maskClosable | 点击蒙层是否允许关闭 | boolean | false |  |
@@ -166,6 +168,10 @@ React.useEffect(() => {
 
 return <div>{contextHolder}</div>;
 ```
+
+## Design Token
+
+<ComponentTokenTable component="Modal"></ComponentTokenTable>
 
 ## FAQ
 

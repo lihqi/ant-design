@@ -101,6 +101,7 @@ function getRows(children: React.ReactNode, column: number) {
 export interface DescriptionsProps {
   prefixCls?: string;
   className?: string;
+  rootClassName?: string;
   style?: React.CSSProperties;
   bordered?: boolean;
   size?: 'middle' | 'small' | 'default';
@@ -124,10 +125,12 @@ function Descriptions({
   layout,
   children,
   className,
+  rootClassName,
   style,
   size,
   labelStyle,
   contentStyle,
+  ...restProps
 }: DescriptionsProps) {
   const { getPrefixCls, direction } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('descriptions', customizePrefixCls);
@@ -169,9 +172,11 @@ function Descriptions({
             [`${prefixCls}-rtl`]: direction === 'rtl',
           },
           className,
+          rootClassName,
           hashId,
         )}
         style={style}
+        {...restProps}
       >
         {(title || extra) && (
           <div className={`${prefixCls}-header`}>
